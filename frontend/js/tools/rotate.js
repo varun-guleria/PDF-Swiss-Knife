@@ -1,0 +1,105 @@
+/**
+ * tools/rotate.js — Rotate Pages Tool.
+ * Quick rotate: apply a uniform rotation to all pages.
+ */
+'use strict';
+import * as api from '../api.js';
+import { isPdf, escapeHtml } from '../utils.js';
+import { createDropzone } from '../components/dropzone.js';
+import { createProgressView } from '../components/progress.js';
+
+export function renderRotate(container) {
+  let selectedFile = null;
+  let docInfo = null;
+
+  const panel = document.createElement('div');
+  panel.className = 'tool-panel';
+  panel.innerHTML = `
+    <div class="page-header">
+      <h1 class="page-header__title">Rotate Pages</h1>
+      <p class="page-header__subtitle">Rotate all pages in a PDF by 90°, 180°, or 270°.</p>
+    </div>
+    <div class="tool-workspace" style="display:flex;flex-direction:column;gap:var(--space-6);">
+      <div id="rotate-dropzone"></div>
+      <div id="rotate-options" class="card" style="display:none;">
+        <div class="card__header"><div class="card__title" id="rotate-filename"></div></div>
+        <div class="card__body">
+          <label style="font-size:var(--font-size-sm);font-weight:var(--font-weight-medium);display:block;margin-bottom:var(--space-3);">Rotation</label>
+          <div style="display:flex;gap:var(--space-3);flex-wrap:wrap;">
+            <label style="display:flex;align-items:center;gap:var(--space-2);padding:var(--space-3) var(--space-4);border-radius:var(--radius-md);border:1px solid var(--color-border);cursor:pointer;">
+              <input type="radio" name="rotation" value="90" checked style="accent-color:var(--color-brand);"> <span style="font-size:var(--font-size-sm);">90° Clockwise</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:var(--space-2);padding:var(--space-3) var(--space-4);border-radius:var(--radius-md);border:1px solid var(--color-border);cursor:pointer;">
+              <input type="radio" name="rotation" value="180" style="accent-color:var(--color-brand);"> <span style="font-size:var(--font-size-sm);">180°</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:var(--space-2);padding:var(--space-3) var(--space-4);border-radius:var(--radius-md);border:1px solid var(--color-border);cursor:pointer;">
+              <input type="radio" name="rotation" value="270" style="accent-color:var(--color-brand);"> <span style="font-size:var(--font-size-sm);">90° Counter-clockwise</span>
+            </label>
+          </div>
+        </div>
+        <div class="card__footer" style="justify-content:flex-end;">
+          <button type="button" class="btn btn--primary" id="rotate-btn"><i data-lucide="rotate-cw"></i><span>Rotate All Pages</span></button>
+        </div>
+      </div>
+      <div id="rotate-progress" style="display:none;"></div>
+    </div>
+  `;
+  container.appendChild(panel);
+
+  const dropzone = panel.querySelector('#rotate-dropzone');
+  const optionsCard = panel.querySelector('#rotate-options');
+  const progressEl = panel.querySelector('#rotate-progress');
+
+  createDropzone({
+    container: dropzone, accept: '.pdf,application/pdf', multiple: false,
+    title: 'Choose a PDF file', subtitle: 'Select a PDF to rotate', icon: 'rotate-cw',
+    onFiles: async (files) => {
+      const valid = files.filter(isPdf);
+      if (!valid.length) return;
+      selectedFile = valid[0];
+      try {
+        docInfo = await api.inspectPdf(selectedFile);
+        panel.querySelector('#rotate-filename').textContent = `${selectedFile.name} — ${docInfo.page_count} pages`;
+        dropzone.style.display = 'none';
+        optionsCard.style.display = 'block';
+      } catch (e) { alert(e.message); }
+      if (window.lucide) window.lucide.createIcons({ node: panel });
+    },
+  });
+
+  panel.querySelector('#rotate-btn').addEventListener('click', async () => {
+    if (!docInfo) return;
+    const rotation = parseInt(panel.querySelector('input[name="rotation"]:checked').value);
+    const specs = docInfo.pages.map(p => ({ index: p.index, rotation }));
+
+    optionsCard.style.display = 'none';
+    progressEl.style.display = 'block';
+    progressEl.innerHTML = '';
+
+    const pv = createProgressView({ container: progressEl, title: 'Rotating pages…' });
+    pv.update({ percent: 50, message: 'Processing…', status: 'Rotating' });
+
+    try {
+      const result = await api.reorganizePdf(docInfo.doc_id, specs, `rotated_${selectedFile.name}`);
+      const finalStatus = await api.pollJob(result.job_id, (job) => {
+        pv.update({ current: job.current, total: job.total, message: job.message, status: 'Processing' });
+      });
+      const filesRes = await api.listOutputs(result.job_id).catch(() => ({ files: [] }));
+      pv.showSuccess({
+        title: 'Rotation Complete!',
+        message: `Rotated ${docInfo.page_count} pages by ${rotation}°.`,
+        actions: [
+          { label: 'Download', icon: 'download', variant: 'primary',
+            onClick: () => api.downloadFile(result.job_id, filesRes.files?.[0]?.name || result.output_name) },
+          { label: 'Rotate Another', icon: 'refresh-cw', variant: 'secondary',
+            onClick: () => { container.innerHTML = ''; renderRotate(container); } },
+        ],
+      });
+    } catch (e) {
+      pv.showError({ title: 'Rotation Failed', message: e.message,
+        onReset: () => { container.innerHTML = ''; renderRotate(container); } });
+    }
+  });
+
+  if (window.lucide) window.lucide.createIcons({ node: panel });
+}
