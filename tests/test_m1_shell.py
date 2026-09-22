@@ -43,7 +43,7 @@ def test_frontend_index_served(client):
 
 def test_static_css_served(client):
     """Verify all core CSS design system files are served."""
-    css_files = ["tokens.css", "base.css", "layout.css", "components.css", "tools.css"]
+    css_files = ["tokens.css", "base.css", "layout.css", "components.css", "tools.css", "landing.css"]
     for css in css_files:
         res = client.get(f"/css/{css}")
         assert res.status_code == 200, f"Failed to serve /css/{css}"

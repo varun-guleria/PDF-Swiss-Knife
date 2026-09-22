@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="PDF Swiss-Knife — A local PDF workspace for merging, splitting, organising, converting, and batch-processing PDF files." />
+  <meta name="description" content="PDF Swiss-Knife — A local, all-in-one PDF workspace for merging, editing, organizing, converting and creating documents." />
   <title>PDF Swiss-Knife — Local PDF Workspace</title>
 
   <!-- Favicon -->
@@ -29,15 +29,278 @@
   <link rel="stylesheet" href="/css/layout.css" />
   <link rel="stylesheet" href="/css/components.css" />
   <link rel="stylesheet" href="/css/tools.css" />
+  <link rel="stylesheet" href="/css/landing.css" />
 </head>
 <body>
 
-<!--
-  App shell.
-  The sidebar and topbar are rendered by app.js into their respective containers.
-  The tool content area is populated by renderTool() on navigation.
--->
-<div id="app" role="application" aria-label="PDF Swiss-Knife">
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     LANDING PAGE (Default entry showcase view)
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<div id="landing-page" class="landing-page" role="region" aria-label="Landing Page">
+
+  <!-- ── Landing Navigation ──────────────────────────────────────────────── -->
+  <nav class="landing-nav" aria-label="Landing Navigation">
+    <a id="landing-brand-link" class="landing-nav__brand" href="#/">
+      <img src="/assets/logo.png" alt="PDF Swiss-Knife Logo" class="landing-nav__logo" />
+      <span>PDF Swiss-Knife</span>
+      <span class="landing-nav__badge">Local &amp; Offline</span>
+    </a>
+
+    <div class="landing-nav__actions">
+      <a href="#workflows-section" class="landing-nav__link">Workflows</a>
+      <a href="#privacy-section" class="landing-nav__link">Privacy</a>
+      
+      <!-- Theme Switcher on Landing Page -->
+      <div class="theme-toggle" role="group" aria-label="Theme selector">
+        <button class="theme-toggle__btn" data-theme-value="light" title="Light theme" aria-label="Light theme">
+          <i data-lucide="sun"></i>
+        </button>
+        <button class="theme-toggle__btn" data-theme-value="dark" title="Dark theme" aria-label="Dark theme">
+          <i data-lucide="moon"></i>
+        </button>
+        <button class="theme-toggle__btn" data-theme-value="system" title="System default" aria-label="System default">
+          <i data-lucide="monitor"></i>
+        </button>
+      </div>
+
+      <button id="nav-open-app-btn" class="btn btn--primary" type="button">
+        Open Workspace
+      </button>
+    </div>
+  </nav>
+
+  <!-- ── Pinned/Sticky Hero Track with Video Scrubbing ────────────────────── -->
+  <section id="hero-track" class="hero-track" aria-label="Hero Showcase">
+    <div class="hero-stage">
+      
+      <!-- Video Centerpiece (Controlled by scroll progress) -->
+      <div class="hero-video-wrapper">
+        <video
+          id="hero-video"
+          class="hero-video"
+          src="/assets/hero-animation.mp4"
+          poster="/assets/hero-poster.jpg"
+          preload="auto"
+          muted
+          playsinline
+          aria-label="PDF transformation animation"
+        ></video>
+      </div>
+
+      <!-- Hero Typography Layer -->
+      <div class="hero-content">
+        <div class="hero-readability-scrim">
+          <span class="hero-eyebrow">
+            <i data-lucide="file-text" style="width: 14px; height: 14px;"></i>
+            PDF Swiss-Knife
+          </span>
+          <h1 class="hero-headline">
+            One workspace.<br />Every PDF task.
+          </h1>
+          <p class="hero-subhead">
+            A local, all-in-one PDF workspace for merging, editing, organizing, converting and creating documents.
+          </p>
+          <div class="hero-actions">
+            <button id="hero-open-app-btn" class="hero-btn-primary" type="button">
+              <span>Open PDF Swiss-Knife</span>
+              <i data-lucide="arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subtle scroll exploration hint -->
+      <div id="hero-scroll-hint" class="hero-scroll-hint" aria-hidden="true">
+        <span>Scroll to explore</span>
+        <i data-lucide="chevron-down"></i>
+      </div>
+
+    </div><!-- /.hero-stage -->
+  </section><!-- /#hero-track -->
+
+  <!-- ── Transition Section: Architecture & Capabilities ─────────────────── -->
+  <div class="landing-content">
+    
+    <!-- Privacy & Local Design -->
+    <section id="privacy-section" class="landing-section">
+      <div class="landing-section__header">
+        <span class="landing-section__eyebrow">Privacy By Architecture</span>
+        <h2 class="landing-section__title">Your Documents Never Leave Your Computer</h2>
+        <p class="landing-section__desc">
+          PDF Swiss-Knife runs 100% locally on your machine. No telemetry, no cloud relays, no file size limits, and no subscriptions.
+        </p>
+      </div>
+
+      <div class="privacy-grid">
+        <div class="privacy-card">
+          <div class="privacy-card__icon">
+            <i data-lucide="shield-check"></i>
+          </div>
+          <h3 class="privacy-card__title">Complete Privacy</h3>
+          <p class="privacy-card__text">
+            Sensitive legal, financial, and confidential documents are processed exclusively in your machine's memory and local disk.
+          </p>
+        </div>
+
+        <div class="privacy-card">
+          <div class="privacy-card__icon">
+            <i data-lucide="wifi-off"></i>
+          </div>
+          <h3 class="privacy-card__title">Fully Offline</h3>
+          <p class="privacy-card__text">
+            No internet connection required. Work seamlessly in air-gapped environments, on flights, or during remote deployments.
+          </p>
+        </div>
+
+        <div class="privacy-card">
+          <div class="privacy-card__icon">
+            <i data-lucide="infinity"></i>
+          </div>
+          <h3 class="privacy-card__title">No File Caps</h3>
+          <p class="privacy-card__text">
+            Process documents with hundreds of pages or gigabytes in size without server upload timeouts or arbitrary size caps.
+          </p>
+        </div>
+      </div>
+
+      <!-- Workflows Grid -->
+      <div id="workflows-section" class="landing-section__header" style="margin-top: 40px;">
+        <span class="landing-section__eyebrow">Workflows &amp; Tools</span>
+        <h2 class="landing-section__title">Comprehensive Document Tooling</h2>
+        <p class="landing-section__desc">
+          Every tool is accessible in one streamlined desktop workspace.
+        </p>
+      </div>
+
+      <div class="workflows-grid">
+        <div class="workflow-item">
+          <div>
+            <div class="workflow-item__header">
+              <div class="workflow-item__icon"><i data-lucide="layers"></i></div>
+              <h3 class="workflow-item__title">Merge PDFs</h3>
+            </div>
+            <p class="workflow-item__desc">Combine multiple documents in custom sequence with drag-and-drop reordering.</p>
+          </div>
+          <button class="workflow-item__action workflow-launch-btn" data-tool="merge" type="button">
+            Launch Merge &rarr;
+          </button>
+        </div>
+
+        <div class="workflow-item">
+          <div>
+            <div class="workflow-item__header">
+              <div class="workflow-item__icon"><i data-lucide="scissors"></i></div>
+              <h3 class="workflow-item__title">Split PDF</h3>
+            </div>
+            <p class="workflow-item__desc">Divide documents into individual single pages, chunks of N pages, or precise page ranges.</p>
+          </div>
+          <button class="workflow-item__action workflow-launch-btn" data-tool="split" type="button">
+            Launch Split &rarr;
+          </button>
+        </div>
+
+        <div class="workflow-item">
+          <div>
+            <div class="workflow-item__header">
+              <div class="workflow-item__icon"><i data-lucide="layout-grid"></i></div>
+              <h3 class="workflow-item__title">Organise Pages</h3>
+            </div>
+            <p class="workflow-item__desc">Reorder, delete, and rotate pages visually with high-resolution thumbnail previews.</p>
+          </div>
+          <button class="workflow-item__action workflow-launch-btn" data-tool="organize" type="button">
+            Launch Organise &rarr;
+          </button>
+        </div>
+
+        <div class="workflow-item">
+          <div>
+            <div class="workflow-item__header">
+              <div class="workflow-item__icon"><i data-lucide="image"></i></div>
+              <h3 class="workflow-item__title">Convert</h3>
+            </div>
+            <p class="workflow-item__desc">Render PDF pages to high-DPI PNG/JPEG images or compile image collections into standard PDFs.</p>
+          </div>
+          <button class="workflow-item__action workflow-launch-btn" data-tool="toImages" type="button">
+            Launch Convert &rarr;
+          </button>
+        </div>
+
+        <div class="workflow-item">
+          <div>
+            <div class="workflow-item__header">
+              <div class="workflow-item__icon"><i data-lucide="archive"></i></div>
+              <h3 class="workflow-item__title">Compress &amp; Repair</h3>
+            </div>
+            <p class="workflow-item__desc">Reduce file size losslessly and restore corrupted structures using native pikepdf engines.</p>
+          </div>
+          <button class="workflow-item__action workflow-launch-btn" data-tool="compress" type="button">
+            Launch Optimise &rarr;
+          </button>
+        </div>
+
+        <div class="workflow-item">
+          <div>
+            <div class="workflow-item__header">
+              <div class="workflow-item__icon"><i data-lucide="lock"></i></div>
+              <h3 class="workflow-item__title">Security</h3>
+            </div>
+            <p class="workflow-item__desc">Encrypt documents with 256-bit AES protection and remove passwords when permissions allow.</p>
+          </div>
+          <button class="workflow-item__action workflow-launch-btn" data-tool="protect" type="button">
+            Launch Security &rarr;
+          </button>
+        </div>
+
+        <div class="workflow-item" style="grid-column: 1 / -1;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-4);">
+            <div>
+              <div class="workflow-item__header">
+                <div class="workflow-item__icon"><i data-lucide="layers"></i></div>
+                <h3 class="workflow-item__title">Custom Batch PDF Builder</h3>
+              </div>
+              <p class="workflow-item__desc" style="max-width: 680px; margin-bottom: 0;">
+                Assemble repeating document sets (covers, terms, instructions) with batches of unique records dynamically.
+              </p>
+            </div>
+            <button class="workflow-item__action workflow-launch-btn btn btn--primary" data-tool="batch" type="button" style="text-decoration: none; padding: 8px 16px;">
+              Open Custom Batch Builder &rarr;
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom CTA Banner -->
+      <div class="landing-cta-banner">
+        <h3 class="landing-cta-banner__title">Ready to work with your PDF documents?</h3>
+        <p class="landing-cta-banner__sub">
+          Launch the local workspace now. Your files remain on your disk at all times.
+        </p>
+        <button id="cta-open-app-btn" class="hero-btn-primary" type="button">
+          <span>Open PDF Swiss-Knife</span>
+          <i data-lucide="arrow-right"></i>
+        </button>
+      </div>
+
+    </section>
+
+    <!-- Landing Footer -->
+    <footer class="landing-footer">
+      <div>
+        <strong>PDF Swiss-Knife</strong> &mdash; Local PDF Productivity Workspace.
+      </div>
+      <div>
+        Running locally on this computer &bull; Fully private &bull; Zero telemetry
+      </div>
+    </footer>
+
+  </div><!-- /.landing-content -->
+
+</div><!-- /#landing-page -->
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     APP WORKSPACE (The desktop productivity workspace)
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<div id="app" role="application" aria-label="PDF Swiss-Knife" style="display: none;">
 
   <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
   <aside id="sidebar" class="sidebar" aria-label="Navigation">
@@ -73,7 +336,7 @@
 <!--
   JavaScript modules.
   type="module" enables ES module imports and defers execution automatically.
-  app.js is the entry point; it imports api.js, utils.js, and tool modules.
+  app.js is the entry point; it imports api.js, utils.js, landing.js, and tool modules.
 -->
 <script type="module" src="/js/app.js"></script>
 

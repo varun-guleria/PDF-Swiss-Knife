@@ -2,11 +2,11 @@
 
 ## Current Milestone
 
-Milestones 0, 1, 2, 3, 4, 5, 6 ✓ → **Project Complete & Production Ready**
+Milestones 0, 1, 2, 3, 4, 5, 6, 7, 8 ✓ → **Project Complete & Production Ready**
 
 ## Overall Status
 
-COMPLETE — ALL MILESTONES (0 THROUGH 6) IMPLEMENTED, VERIFIED, AND FULLY FUNCTIONAL
+COMPLETE — ALL MILESTONES (0 THROUGH 8) IMPLEMENTED, VERIFIED, AND FULLY FUNCTIONAL
 
 ---
 
@@ -281,6 +281,46 @@ Transform the user interface into a mature, desktop-class local productivity wor
 
 ---
 
+### M8 — Landing Page Hero Scroll-Controlled Animation
+**Status: COMPLETE**  
+**Date: 2026-09-22**
+
+#### Objective
+Integrate the supplied MP4 3D animation (`gemini_generated_video_97437576.mp4`) as the visual centerpiece of a new Apple-inspired, cinematic landing-page hero:
+- Use the actual supplied MP4 as the hero centerpiece behind the typography (no SVG/Canvas regeneration).
+- Implement scroll-controlled video scrubbing via `requestAnimationFrame`: 0.0s at page top, smoothly progressing to final red PDF frame at scroll end.
+- Full bi-directional reverse scrolling support (scrolling up reverses the animation).
+- Pinned/sticky hero section (250vh scroll track, 100vh pinned stage).
+- Layered hero typography with subtle localized readability scrim (WCAG AAA contrast without dark curtains over the 3D model).
+- Direct primary action `[ Open PDF Swiss-Knife ]` transitioning into the local desktop workspace (`#app`), keeping all 15 tools intact.
+- Seamless responsive design (desktop, tablet, mobile), theme compatibility (Light & Dark modes), and `prefers-reduced-motion` accessibility.
+
+#### Completed
+- [x] Copied supplied video: `F:\gemini_generated_video_97437576.mp4` → `frontend/assets/hero-animation.mp4` (~1.14 MB, 1280x720, 10.01s).
+- [x] Extracted poster frame: `frontend/assets/hero-poster.jpg` for pre-video loading and reduced-motion fallback.
+- [x] Created `frontend/css/landing.css`: Sticky stage, centered video wrapper, localized radial contrast scrim, privacy feature cards, workflow launcher grid, and responsive rules.
+- [x] Created `frontend/js/landing.js`: Scroll-driven scrubbing engine using `requestAnimationFrame`, progress damping, reverse scrubbing, and `prefers-reduced-motion` fallback.
+- [x] Updated `frontend/index.html`: Semantic `#landing-page` container, navbar, hero section, privacy grid, workflows launcher, and footer.
+- [x] Updated `frontend/js/app.js`: Integrated view routing between Landing Page (`#/`) and App Workspace (`#/app`), with topbar and sidebar return navigation.
+- [x] Created `tests/test_landing_hero.py`: 6 automated tests verifying markup, assets, typography, scrubbing engine, CSS rules, and routing.
+- [x] Verified full test suite: 63/63 tests passing (`pytest -v`).
+- [x] Verified live server serving: HTML, MP4 video, poster image, CSS, and JS verified via `scratch/verify_landing_live.py`.
+- [x] Verified backend operations: Merge, Organize, and Split confirmed operational via `tests/test_live_server.py`.
+
+#### Verification
+1. **Landing Page Loads**: Verified `http://127.0.0.1:5000/` loads `#landing-page` with HTTP 200.
+2. **Video Centerpiece**: Verified `hero-animation.mp4` (1,142,466 bytes) and `hero-poster.jpg` (16,183 bytes) served with correct MIME types.
+3. **Scroll Scrubbing**: Verified `landing.js` calculates scroll progress through 250vh track and updates `video.currentTime` via `requestAnimationFrame`.
+4. **Reverse Scrolling**: Verified bi-directional calculation smoothly reverses `currentTime` when scrolling upward.
+5. **Final Frame**: Verified full track scroll reaches the final frame (`currentTime = duration`).
+6. **Hero Text Readability**: Verified exact required copy with localized radial scrim ensuring contrast across light and dark modes.
+7. **Open App Transition**: Verified clicking `[ Open PDF Swiss-Knife ]` transitions to `#app` workspace, rendering the active tool.
+8. **Responsive Layout**: Verified layout rules for desktop, tablet (960px), and mobile (640px).
+9. **Themes**: Verified seamless color matching on light mode (`#ececec`) and dark mode (`#141517` with radial mask blend).
+10. **Zero Console Errors**: Verified error-free client execution and clean API health checks.
+
+---
+
 ## Verification Log
 
 | Date | Milestone | Item | Result |
@@ -292,7 +332,8 @@ Transform the user interface into a mature, desktop-class local productivity wor
 | 2026-09-22 | M4 | Page Organization engine, thumbnail previews, UI | VERIFIED (4/4 tests passed + live test) |
 | 2026-09-22 | M5 | Batch PDF Builder engine, API, UI, ZIP download | VERIFIED (12/12 tests passed) |
 | 2026-09-22 | M6 | Complete PDF Utilities (14 tools, API, and UI) | VERIFIED (20/20 tests passed, 51/51 total) |
-| 2026-09-22 | M7 | Desktop-Style Productivity UI/UX Redesign | VERIFIED (6/6 new tests, 57/57 total + live tests) |
+| 2026-09-22 | M7 | Desktop-Style Productivity UI/UX Redesign | VERIFIED (6/6 tests, 57/57 total + live tests) |
+| 2026-09-22 | M8 | Landing Page Hero Scroll-Controlled Animation | VERIFIED (6/6 tests, 63/63 total + live tests) |
 
 ---
 

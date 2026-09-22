@@ -30,6 +30,7 @@ import { renderRepair } from './tools/repair.js';
 import { renderInfo } from './tools/info.js';
 import { renderProtect } from './tools/protect.js';
 import { renderUnprotect } from './tools/unprotect.js';
+import { initLandingPage } from './landing.js';
 
 // ─── Nav definition ────────────────────────────────────────────────────────
 // Each entry: { id, label, icon, section, badge? }
@@ -103,14 +104,61 @@ function getSavedTheme() {
   return localStorage.getItem(THEME_KEY) || 'system';
 }
 
-// ─── Navigation ────────────────────────────────────────────────────────────
+// ─── Navigation & View Switching ───────────────────────────────────────────
 
 /**
- * Navigate to a tool by ID.
+ * Show the Landing Page view.
+ */
+export function showLandingView() {
+  const landing = document.getElementById('landing-page');
+  const app = document.getElementById('app');
+  if (landing) landing.style.display = 'block';
+  if (app) app.style.display = 'none';
+  document.title = 'PDF Swiss-Knife — Local PDF Workspace';
+  window.scrollTo({ top: 0 });
+}
+
+/**
+ * Show the Desktop App Workspace view.
+ * @param {string} [toolId='home']
+ */
+export function showAppView(toolId = 'home') {
+  const landing = document.getElementById('landing-page');
+  const app = document.getElementById('app');
+  if (landing) landing.style.display = 'none';
+  if (app) app.style.display = 'flex';
+  navigate(toolId);
+}
+
+/**
+ * Handle URL hash changes for routing.
+ */
+function handleRoute() {
+  const hash = window.location.hash || '';
+  if (hash.startsWith('#/app/')) {
+    const toolId = hash.replace('#/app/', '').trim();
+    showAppView(toolId || 'home');
+  } else if (hash === '#/app') {
+    showAppView('home');
+  } else if (hash.startsWith('#') && hash.length > 2 && NAV_ITEMS.some(n => `#${n.id}` === hash)) {
+    const toolId = hash.substring(1);
+    showAppView(toolId);
+  } else {
+    showLandingView();
+  }
+}
+
+/**
+ * Navigate to a tool by ID within the App Workspace.
  * @param {string} toolId
  */
 function navigate(toolId) {
   currentToolId = toolId;
+
+  // Sync URL hash
+  if (window.location.hash !== `#/app/${toolId}` && window.location.hash !== `#${toolId}`) {
+    history.replaceState(null, '', `#/app/${toolId}`);
+  }
 
   // Update nav active state
   document.querySelectorAll('.nav-item[data-tool]').forEach(el => {
@@ -393,12 +441,17 @@ function buildSidebar() {
   navHtml += '</div></nav>'; // close last section + nav
 
   sidebar.innerHTML = `
-    <div class="sidebar__logo">
+    <div class="sidebar__logo" title="Back to Landing Page Overview" style="cursor: pointer;">
       <img src="/favicon-32x32.png" class="sidebar__logo-icon" alt="PDF Swiss-Knife" style="border-radius:5px;object-fit:contain;" />
       <span class="sidebar__logo-text">PDF Swiss-Knife</span>
     </div>
     ${navHtml}
   `;
+
+  // Logo click returns to landing page
+  sidebar.querySelector('.sidebar__logo')?.addEventListener('click', () => {
+    window.location.hash = '#/';
+  });
 
   // Wire nav clicks
   sidebar.querySelectorAll('.nav-item[data-tool]').forEach(btn => {
@@ -415,6 +468,10 @@ function buildTopbar() {
   const topbar = document.getElementById('topbar');
   if (!topbar) return;
   topbar.innerHTML = `
+    <button id="topbar-landing-btn" class="btn btn--ghost" title="Back to Landing Page Overview" style="font-size: 12px; gap: 4px; padding: 4px 8px; margin-right: 8px;">
+      <i data-lucide="arrow-left" style="width: 14px; height: 14px;"></i>
+      <span>Overview</span>
+    </button>
     <div id="topbar-breadcrumb" class="topbar__breadcrumb" aria-label="Current location">
       <span class="current">Home</span>
     </div>
@@ -438,6 +495,10 @@ function buildTopbar() {
     </div>
   `;
 
+  document.getElementById('topbar-landing-btn')?.addEventListener('click', () => {
+    window.location.hash = '#/';
+  });
+
   topbar.querySelectorAll('.theme-toggle__btn').forEach(btn => {
     btn.addEventListener('click', () => applyTheme(btn.dataset.themeValue));
   });
@@ -458,16 +519,31 @@ async function boot() {
   buildSidebar();
   buildTopbar();
 
-  // 3. Apply theme properly (also updates toggle button states)
+  // 3. Apply theme properly (also updates toggle button states everywhere)
   applyTheme(savedTheme);
 
-  // 4. Render Lucide icons
+  // 4. Initialise landing page hero scrubbing and interaction handlers
+  initLandingPage({
+    onOpenApp: (toolId) => {
+      window.location.hash = `#/app/${toolId || 'home'}`;
+    }
+  });
+
+  // 5. Wire all theme toggle buttons across the whole document (landing + app)
+  document.querySelectorAll('.theme-toggle__btn').forEach(btn => {
+    btn.addEventListener('click', () => applyTheme(btn.dataset.themeValue));
+  });
+
+  // 6. Listen for hash routing
+  window.addEventListener('hashchange', handleRoute);
+
+  // 7. Initial route resolution
+  handleRoute();
+
+  // 8. Render Lucide icons
   if (window.lucide) window.lucide.createIcons();
 
-  // 5. Navigate to home
-  renderTool('home');
-
-  // 6. Listen for system theme changes
+  // 9. Listen for system theme changes
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
     if (getSavedTheme() === 'system') applyTheme('system');
   });
