@@ -119,3 +119,27 @@ export function formatPercent(current, total) {
   if (!total) return '0%';
   return `${Math.round((current / total) * 100)}%`;
 }
+
+/**
+ * Record a completed job in localStorage for the session activity feed.
+ * @param {string} tool - Tool name (e.g. 'Merge PDFs')
+ * @param {string} filename - Output file name
+ * @param {string} [downloadUrl] - URL to download output
+ */
+export function recordRecentJob(tool, filename, downloadUrl) {
+  try {
+    const raw = localStorage.getItem('psk-recent-activity');
+    let list = raw ? JSON.parse(raw) : [];
+    list.unshift({
+      id: uid(),
+      tool,
+      filename,
+      downloadUrl: downloadUrl || '',
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    });
+    if (list.length > 10) list = list.slice(0, 10);
+    localStorage.setItem('psk-recent-activity', JSON.stringify(list));
+  } catch {
+    // Ignore storage write issues
+  }
+}

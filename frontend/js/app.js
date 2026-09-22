@@ -65,7 +65,7 @@ const NAV_ITEMS = [
   { id: 'unprotect',    label: 'Remove Protection',  icon: 'unlock',        section: 'Security' },
 
   // ADVANCED
-  { id: 'batch',        label: 'Batch PDF Builder',  icon: 'layers',        section: 'Advanced', badge: 'PRO' },
+  { id: 'batch',        label: 'Custom Batch PDF Builder', icon: 'layers', section: 'Advanced', badge: 'PRO' },
 
   // SETTINGS
   { id: 'settings',     label: 'Settings',           icon: 'settings',      section: null },
@@ -121,10 +121,15 @@ function navigate(toolId) {
   const item = NAV_ITEMS.find(n => n.id === toolId);
   const breadcrumb = document.getElementById('topbar-breadcrumb');
   if (breadcrumb && item) {
-    breadcrumb.innerHTML = `
-      ${item.section ? `<span>${item.section}</span><span style="color:var(--color-border)">›</span>` : ''}
-      <span class="current">${item.label}</span>
-    `;
+    if (item.section) {
+      breadcrumb.innerHTML = `
+        <span class="section-label">${item.section}</span>
+        <span class="sep">/</span>
+        <span class="current">${item.label}</span>
+      `;
+    } else {
+      breadcrumb.innerHTML = `<span class="current">${item.label}</span>`;
+    }
   }
 
   // Render tool panel
@@ -143,7 +148,9 @@ async function renderTool(toolId) {
   content.innerHTML = '';
 
   const inner = document.createElement('div');
-  inner.className = 'content-inner';
+  inner.className = (toolId === 'batch' || toolId === 'organize')
+    ? 'content-inner content-inner--wide'
+    : 'content-inner';
   content.appendChild(inner);
 
   switch (toolId) {
@@ -413,11 +420,15 @@ function buildTopbar() {
     </div>
     <div class="topbar__spacer"></div>
     <div class="topbar__actions">
+      <div class="topbar__meta-badge" title="All PDF processing is 100% local on this machine">
+        <i data-lucide="shield-check"></i>
+        <span>100% Local</span>
+      </div>
       <div class="theme-toggle" role="group" aria-label="Theme selection" id="topbar-theme-toggle">
         <button class="theme-toggle__btn" data-theme-value="light" title="Light theme" aria-label="Light theme">
           <i data-lucide="sun"></i>
         </button>
-        <button class="theme-toggle__btn" data-theme-value="system" title="System theme" aria-label="System theme">
+        <button class="theme-toggle__btn" data-theme-value="system" title="Follow system theme" aria-label="Follow system theme">
           <i data-lucide="monitor"></i>
         </button>
         <button class="theme-toggle__btn" data-theme-value="dark" title="Dark theme" aria-label="Dark theme">

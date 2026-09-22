@@ -8,7 +8,7 @@
 'use strict';
 
 import * as api from '../api.js';
-import { isPdf, formatFileSize, escapeHtml } from '../utils.js';
+import { isPdf, formatFileSize, escapeHtml, recordRecentJob } from '../utils.js';
 import { createDropzone } from '../components/dropzone.js';
 import { createFileList } from '../components/fileRow.js';
 import { createProgressView } from '../components/progress.js';
@@ -37,16 +37,17 @@ export function renderMerge(container) {
     </div>
 
     <!-- Main Workspace Container -->
-    <div id="merge-workspace" class="tool-workspace" style="display:flex;flex-direction:column;gap:var(--space-6);">
+    <div id="merge-workspace" class="workspace-flow">
       <!-- Dropzone Container -->
       <div id="merge-dropzone-container"></div>
 
       <!-- File List Container -->
-      <div id="merge-file-list-card" class="card" style="display:none;">
-        <div class="card__header" style="justify-content:space-between;">
+      <div id="merge-file-list-card" class="workspace-section" style="display:none;">
+        <div class="workspace-section__header">
           <div style="display:flex;align-items:center;gap:var(--space-3);">
-            <div class="card__title">Files to Merge</div>
-            <span id="merge-file-count" class="badge badge--brand">0 files</span>
+            <i data-lucide="layers" style="width:16px;height:16px;color:var(--color-brand);"></i>
+            <span class="workspace-section__title">Files to Merge</span>
+            <span id="merge-file-count" class="badge badge--default">0 files</span>
           </div>
           <button type="button" id="merge-clear-btn" class="btn btn--ghost btn--sm btn--danger">
             <i data-lucide="trash-2"></i>
@@ -54,13 +55,13 @@ export function renderMerge(container) {
           </button>
         </div>
 
-        <div id="merge-file-list-body" class="card__body" style="padding:0;">
+        <div id="merge-file-list-body" style="padding:0;">
           <!-- Reorderable file list renders here -->
         </div>
 
-        <div class="card__footer" style="flex-wrap:wrap;justify-content:space-between;gap:var(--space-4);">
+        <div style="padding:var(--space-3) var(--space-4);background:var(--color-bg-sunken);border-top:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);">
           <div style="display:flex;align-items:center;gap:var(--space-3);flex:1;min-width:260px;">
-            <label for="merge-output-name" style="font-size:var(--font-size-sm);font-weight:var(--font-weight-medium);color:var(--color-text-secondary);white-space:nowrap;">Output Name:</label>
+            <label for="merge-output-name" style="font-size:var(--font-size-xs);font-weight:var(--font-weight-semibold);color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:var(--letter-spacing-wide);white-space:nowrap;">Output Name:</label>
             <input type="text" id="merge-output-name" class="input" value="merged_document.pdf" placeholder="output_name.pdf" style="max-width:280px;" />
           </div>
 
@@ -212,8 +213,10 @@ export function renderMerge(container) {
       const generatedFile = filesRes.files && filesRes.files[0];
       const fileSize = generatedFile ? formatFileSize(generatedFile.size) : '';
 
+      recordRecentJob('Merge PDFs', outputName, `/api/output/${job_id}/download/${encodeURIComponent(outputName)}`);
+
       progressView.showSuccess({
-        title: 'Merge Complete!',
+        title: 'Merge Complete',
         message: `Successfully combined ${selectedFiles.length} PDF files into ${outputName}${fileSize ? ` (${fileSize})` : ''}.`,
         actions: [
           {

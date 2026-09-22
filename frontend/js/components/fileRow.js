@@ -1,8 +1,9 @@
 /**
  * components/fileRow.js — Reusable file list component with drag-and-drop reordering.
  *
- * Renders an accessible, reorderable list of uploaded PDF files with
- * metadata (size, page count) and quick action controls (move up/down, remove).
+ * Renders an accessible, reorderable desktop-class file manager list for uploaded PDF files.
+ * Each row includes: drag handle, index, file icon, name, type badge, page count,
+ * file size, replace action, reorder controls, and remove action.
  */
 
 'use strict';
@@ -22,6 +23,8 @@ import { formatFileSize, formatPageCount, escapeHtml } from '../utils.js';
  * @property {FileItem[]} files
  * @property {(files: FileItem[]) => void} [onReorder]
  * @property {(index: number) => void} [onRemove]
+ * @property {(index: number, newFile: File) => void} [onReplace]
+ * @property {boolean} [showHeader=true]
  */
 
 /**
@@ -30,8 +33,11 @@ import { formatFileSize, formatPageCount, escapeHtml } from '../utils.js';
  * @returns {{ update: (newFiles: FileItem[]) => void, destroy: () => void }}
  */
 export function createFileList(options) {
-  const { container, onReorder, onRemove } = options;
+  const { container, onReorder, onRemove, onReplace, showHeader = true } = options;
   let items = [...(options.files || [])];
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'file-manager';
 
   const listEl = document.createElement('div');
   listEl.className = 'file-list';
@@ -41,10 +47,23 @@ export function createFileList(options) {
   let draggedIndex = null;
 
   function render() {
+    wrapper.innerHTML = '';
     listEl.innerHTML = '';
 
     if (items.length === 0) {
       return;
+    }
+
+    if (showHeader) {
+      const header = document.createElement('div');
+      header.className = 'file-list__header';
+      header.innerHTML = `
+        <div class="file-list__th file-list__th--index">#</div>
+        <div class="file-list__th file-list__th--name">Document</div>
+        <div class="file-list__th file-list__th--meta">Details</div>
+        <div class="file-list__th file-list__th--actions">Actions</div>
+      `;
+      wrapper.appendChild(header);
     }
 
     items.forEach((item, index) => {
@@ -57,39 +76,56 @@ export function createFileList(options) {
 
       const sizeStr = formatFileSize(file.size || 0);
       const pagesStr = item.pageCount ? formatPageCount(item.pageCount) : '';
-      const metaParts = [sizeStr, pagesStr].filter(Boolean).join(' • ');
+      const ext = (file.name.split('.').pop() || 'pdf').toUpperCase();
 
       row.innerHTML = `
-        <div class="file-row__handle" title="Drag to reorder" aria-hidden="true">
-          <i data-lucide="grip-vertical"></i>
-        </div>
-        <div class="file-row__index">${index + 1}</div>
-        <div class="file-row__icon" aria-hidden="true">
-          <i data-lucide="file-text"></i>
+        <div class="file-row__leading">
+          <div class="file-row__handle" title="Drag to reorder" aria-hidden="true">
+            <i data-lucide="grip-vertical"></i>
+          </div>
+          <div class="file-row__index">${String(index + 1).padStart(2, '0')}</div>
+          <div class="file-row__icon" aria-hidden="true">
+            <i data-lucide="file-text"></i>
+          </div>
         </div>
         <div class="file-row__info">
           <div class="file-row__name" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</div>
-          <div class="file-row__meta">${escapeHtml(metaParts)}</div>
+        </div>
+        <div class="file-row__meta">
+          <span class="file-row__type-badge">${escapeHtml(ext)}</span>
+          ${pagesStr ? `<span class="file-row__pages">${escapeHtml(pagesStr)}</span>` : ''}
+          <span class="file-row__size">${escapeHtml(sizeStr)}</span>
         </div>
         <div class="file-row__actions">
           <button
             type="button"
-            class="btn btn--ghost btn--icon btn--sm file-row__btn-up"
-            title="Move up"
-            aria-label="Move ${escapeHtml(file.name)} up"
-            ${index === 0 ? 'disabled' : ''}
+            class="btn btn--ghost btn--sm file-row__btn-replace"
+            title="Replace this file"
+            aria-label="Replace ${escapeHtml(file.name)}"
           >
-            <i data-lucide="chevron-up"></i>
+            <i data-lucide="refresh-cw"></i>
+            <span class="btn-text">Replace</span>
           </button>
-          <button
-            type="button"
-            class="btn btn--ghost btn--icon btn--sm file-row__btn-down"
-            title="Move down"
-            aria-label="Move ${escapeHtml(file.name)} down"
-            ${index === items.length - 1 ? 'disabled' : ''}
-          >
-            <i data-lucide="chevron-down"></i>
-          </button>
+          <div class="file-row__reorder-group">
+            <button
+              type="button"
+              class="btn btn--ghost btn--icon btn--sm file-row__btn-up"
+              title="Move up"
+              aria-label="Move ${escapeHtml(file.name)} up"
+              ${index === 0 ? 'disabled' : ''}
+            >
+              <i data-lucide="chevron-up"></i>
+            </button>
+            <button
+              type="button"
+              class="btn btn--ghost btn--icon btn--sm file-row__btn-down"
+              title="Move down"
+              aria-label="Move ${escapeHtml(file.name)} down"
+              ${index === items.length - 1 ? 'disabled' : ''}
+            >
+              <i data-lucide="chevron-down"></i>
+            </button>
+          </div>
           <button
             type="button"
             class="btn btn--ghost btn--icon btn--sm btn--danger file-row__btn-remove"
@@ -147,6 +183,7 @@ export function createFileList(options) {
       const btnUp = row.querySelector('.file-row__btn-up');
       const btnDown = row.querySelector('.file-row__btn-down');
       const btnRemove = row.querySelector('.file-row__btn-remove');
+      const btnReplace = row.querySelector('.file-row__btn-replace');
 
       if (btnUp) {
         btnUp.addEventListener('click', (e) => {
@@ -184,15 +221,42 @@ export function createFileList(options) {
         });
       }
 
+      if (btnReplace) {
+        btnReplace.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.accept = '.pdf,application/pdf';
+          fileInput.style.display = 'none';
+          fileInput.addEventListener('change', () => {
+            if (fileInput.files && fileInput.files[0]) {
+              const newFile = fileInput.files[0];
+              if (typeof onReplace === 'function') {
+                onReplace(index, newFile);
+              } else {
+                items[index] = items[index].file ? { ...items[index], file: newFile } : newFile;
+                render();
+                if (typeof onReorder === 'function') onReorder(items);
+              }
+            }
+            fileInput.remove();
+          });
+          document.body.appendChild(fileInput);
+          fileInput.click();
+        });
+      }
+
       listEl.appendChild(row);
     });
 
+    wrapper.appendChild(listEl);
+
     if (window.lucide) {
-      window.lucide.createIcons({ node: listEl });
+      window.lucide.createIcons({ node: wrapper });
     }
   }
 
-  container.appendChild(listEl);
+  container.appendChild(wrapper);
   render();
 
   return {
@@ -201,7 +265,7 @@ export function createFileList(options) {
       render();
     },
     destroy() {
-      listEl.remove();
+      wrapper.remove();
     },
   };
 }

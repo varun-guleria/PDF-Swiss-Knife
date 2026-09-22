@@ -53,37 +53,40 @@ export function renderInfo(container) {
         ).join('');
 
         resultsEl.innerHTML = `
-          <div class="card">
-            <div class="card__header" style="justify-content:space-between;">
-              <div class="card__title">${escapeHtml(info.filename)}</div>
+          <div class="workspace-section">
+            <div class="workspace-section__header">
+              <div style="display:flex;align-items:center;gap:var(--space-3);">
+                <i data-lucide="info" style="width:16px;height:16px;color:var(--color-brand);"></i>
+                <span class="workspace-section__title">${escapeHtml(info.filename)}</span>
+              </div>
               <button type="button" class="btn btn--secondary btn--sm" id="info-another"><i data-lucide="refresh-cw"></i><span>Inspect Another</span></button>
             </div>
-            <div class="card__body">
+            <div style="padding:var(--space-5);">
               <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:var(--space-4);margin-bottom:var(--space-6);">
-                <div style="text-align:center;padding:var(--space-4);border-radius:var(--radius-md);background:var(--color-surface-secondary);">
-                  <div style="font-size:var(--font-size-2xl);font-weight:var(--font-weight-bold);color:var(--color-brand);">${info.page_count}</div>
-                  <div style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);">Pages</div>
+                <div style="padding:var(--space-3) var(--space-4);border-radius:var(--radius-sm);border:1px solid var(--color-border);background:var(--color-bg-sunken);">
+                  <div style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:var(--letter-spacing-wide);margin-bottom:2px;">Pages</div>
+                  <div style="font-size:var(--font-size-xl);font-weight:var(--font-weight-semibold);color:var(--color-text-primary);">${info.page_count}</div>
                 </div>
-                <div style="text-align:center;padding:var(--space-4);border-radius:var(--radius-md);background:var(--color-surface-secondary);">
-                  <div style="font-size:var(--font-size-2xl);font-weight:var(--font-weight-bold);color:var(--color-brand);">${formatFileSize(info.file_size)}</div>
-                  <div style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);">File Size</div>
+                <div style="padding:var(--space-3) var(--space-4);border-radius:var(--radius-sm);border:1px solid var(--color-border);background:var(--color-bg-sunken);">
+                  <div style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:var(--letter-spacing-wide);margin-bottom:2px;">File Size</div>
+                  <div style="font-size:var(--font-size-xl);font-weight:var(--font-weight-semibold);color:var(--color-text-primary);">${formatFileSize(info.file_size)}</div>
                 </div>
-                <div style="text-align:center;padding:var(--space-4);border-radius:var(--radius-md);background:var(--color-surface-secondary);">
-                  <div style="font-size:var(--font-size-2xl);font-weight:var(--font-weight-bold);color:${info.is_encrypted ? 'var(--color-warning)' : 'var(--color-success)'};">${info.is_encrypted ? 'Yes' : 'No'}</div>
-                  <div style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);">Encrypted</div>
+                <div style="padding:var(--space-3) var(--space-4);border-radius:var(--radius-sm);border:1px solid var(--color-border);background:var(--color-bg-sunken);">
+                  <div style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:var(--letter-spacing-wide);margin-bottom:2px;">Encrypted</div>
+                  <div style="font-size:var(--font-size-xl);font-weight:var(--font-weight-semibold);color:${info.is_encrypted ? 'var(--color-warning)' : 'var(--color-success)'};">${info.is_encrypted ? 'Yes' : 'No'}</div>
                 </div>
               </div>
 
-              <h3 style="font-size:var(--font-size-sm);font-weight:var(--font-weight-semibold);margin-bottom:var(--space-3);">Metadata</h3>
-              <table style="width:100%;border-collapse:collapse;font-size:var(--font-size-sm);margin-bottom:var(--space-6);">
+              <h3 style="font-size:var(--font-size-xs);font-weight:var(--font-weight-semibold);text-transform:uppercase;letter-spacing:var(--letter-spacing-wide);color:var(--color-text-secondary);margin-bottom:var(--space-3);">Metadata</h3>
+              <table style="width:100%;border-collapse:collapse;font-size:var(--font-size-sm);margin-bottom:var(--space-6);border:1px solid var(--color-border);border-radius:var(--radius-sm);overflow:hidden;">
                 ${metaRows}
               </table>
 
               ${pageRows ? `
-              <h3 style="font-size:var(--font-size-sm);font-weight:var(--font-weight-semibold);margin-bottom:var(--space-3);">Page Dimensions${info.page_count > 20 ? ' (first 20)' : ''}</h3>
-              <div style="overflow-x:auto;">
+              <h3 style="font-size:var(--font-size-xs);font-weight:var(--font-weight-semibold);text-transform:uppercase;letter-spacing:var(--letter-spacing-wide);color:var(--color-text-secondary);margin-bottom:var(--space-3);">Page Dimensions${info.page_count > 20 ? ' (first 20)' : ''}</h3>
+              <div style="overflow-x:auto;border:1px solid var(--color-border);border-radius:var(--radius-sm);overflow:hidden;">
                 <table style="width:100%;border-collapse:collapse;font-size:var(--font-size-sm);">
-                  <thead><tr style="border-bottom:1px solid var(--color-border);">
+                  <thead><tr style="border-bottom:1px solid var(--color-border);background:var(--color-bg-sunken);font-size:var(--font-size-xs);color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:var(--letter-spacing-wide);">
                     <th style="padding:var(--space-2) var(--space-4);text-align:center;">Page</th>
                     <th style="padding:var(--space-2) var(--space-4);text-align:center;">Points</th>
                     <th style="padding:var(--space-2) var(--space-4);text-align:center;">Inches</th>

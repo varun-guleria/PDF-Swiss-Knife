@@ -8,7 +8,7 @@
 'use strict';
 
 import * as api from '../api.js';
-import { isPdf, isImage, formatFileSize, escapeHtml } from '../utils.js';
+import { isPdf, isImage, formatFileSize, escapeHtml, recordRecentJob } from '../utils.js';
 import { createDropzone } from './dropzone.js';
 import { createProgressView } from './progress.js';
 
@@ -65,14 +65,14 @@ export function createSingleFileTool(opts) {
       <p class="page-header__subtitle">${escapeHtml(subtitle)}</p>
     </div>
 
-    <div class="tool-workspace" style="display:flex;flex-direction:column;gap:var(--space-6);">
+    <div class="workspace-flow">
       <div id="sft-dropzone-container"></div>
 
-      <div id="sft-options-card" class="card" style="display:none;">
-        <div class="card__header" style="justify-content:space-between;">
+      <div id="sft-options-card" class="workspace-section" style="display:none;">
+        <div class="workspace-section__header">
           <div style="display:flex;align-items:center;gap:var(--space-3);">
-            <i data-lucide="file-text" style="width:18px;height:18px;color:var(--color-brand);"></i>
-            <div class="card__title" id="sft-filename"></div>
+            <i data-lucide="file-text" style="width:16px;height:16px;color:var(--color-brand);"></i>
+            <span class="workspace-section__title" id="sft-filename"></span>
             <span id="sft-filesize" class="badge badge--default"></span>
           </div>
           <button type="button" class="btn btn--ghost btn--sm" id="sft-change-file">
@@ -81,11 +81,11 @@ export function createSingleFileTool(opts) {
           </button>
         </div>
 
-        <div class="card__body" id="sft-options-body">
+        <div style="padding:var(--space-5);" id="sft-options-body">
           <!-- Tool-specific options render here -->
         </div>
 
-        <div class="card__footer" style="justify-content:flex-end;">
+        <div style="padding:var(--space-3) var(--space-4);background:var(--color-bg-sunken);border-top:1px solid var(--color-border);display:flex;justify-content:flex-end;">
           <button type="button" class="btn btn--primary btn--lg" id="sft-submit-btn">
             <i data-lucide="${escapeHtml(submitIcon)}"></i>
             <span>${escapeHtml(submitLabel)}</span>
@@ -204,6 +204,14 @@ export function createSingleFileTool(opts) {
 
         const filesRes = await api.listOutputs(result.job_id).catch(() => ({ files: [] }));
         const fileCount = filesRes.files ? filesRes.files.length : 0;
+
+        if (fileCount > 0) {
+          const outName = fileCount === 1 ? filesRes.files[0].name : `${fileCount} Output Files (ZIP)`;
+          const dlUrl = fileCount === 1
+            ? `/api/output/${result.job_id}/download/${encodeURIComponent(filesRes.files[0].name)}`
+            : `/api/output/${result.job_id}/zip`;
+          recordRecentJob(title, outName, dlUrl);
+        }
 
         let successActions;
         if (getSuccessActions) {

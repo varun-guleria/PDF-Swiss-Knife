@@ -1,9 +1,9 @@
 /*
  * tokens.css — Design tokens for PDF Swiss-Knife
  *
- * All colour, typography, spacing, and shape values are defined here as
- * CSS custom properties. Nothing in the rest of the codebase uses raw values —
- * only tokens. This makes theming (light / dark / system) trivially reliable.
+ * Professional desktop-class productivity utility tokens.
+ * Focuses on clarity, simplicity, information hierarchy, subtle surfaces,
+ * restrained controls, and productivity-oriented density.
  *
  * Token naming convention:
  *   --color-{role}-{variant}
@@ -14,131 +14,131 @@
  *   --duration-{speed}
  */
 
-/* ─── Light theme (default) ─────────────────────────────────────────────── */
+/* ─── Light theme (default desktop) ──────────────────────────────────────── */
 :root,
 [data-theme="light"] {
   color-scheme: light;
 
   /* Surface */
-  --color-bg-app:       #f0f2f5;       /* Page / outermost background */
-  --color-bg-sidebar:   #ffffff;       /* Sidebar */
-  --color-bg-surface:   #ffffff;       /* Cards, panels, dialogs */
-  --color-bg-elevated:  #ffffff;       /* Elevated dropdowns, tooltips */
-  --color-bg-sunken:    #f0f2f5;       /* Input backgrounds, inset areas */
-  --color-bg-hover:     #f5f6f8;       /* Row hover */
-  --color-bg-selected:  #e8f0fe;       /* Selected item bg */
-  --color-bg-overlay:   rgba(0,0,0,0.35);
+  --color-bg-app:        #f8f9fa;      /* Main application canvas */
+  --color-bg-sidebar:    #f0f2f5;      /* Navigation sidebar (slightly inset) */
+  --color-bg-surface:    #ffffff;      /* Workspace panels, file tables, documents */
+  --color-bg-elevated:   #ffffff;      /* Dialogs, popovers */
+  --color-bg-sunken:     #f3f4f6;      /* Input fields, table header bars */
+  --color-bg-hover:      #eaedf1;      /* Row / button hover */
+  --color-bg-selected:   #e8f0fe;      /* Selected row / item */
+  --color-bg-overlay:    rgba(15, 23, 42, 0.4);
 
-  /* Border */
-  --color-border:       #e0e3e8;       /* Standard border */
-  --color-border-focus: #4a7cf4;       /* Focused input / active ring */
-  --color-border-subtle:#eef0f3;       /* Hairline separators */
+  /* Borders */
+  --color-border:        #d9dce1;      /* Crisp structural borders */
+  --color-border-focus:  #1a73e8;      /* Active / focus boundary */
+  --color-border-subtle: #e6e9ed;      /* Hairline row dividers */
 
   /* Text */
-  --color-text-primary:   #1a1d23;     /* Headings, primary labels */
-  --color-text-secondary: #5f6470;     /* Supporting text, metadata */
-  --color-text-tertiary:  #9ba3af;     /* Placeholders, hints */
-  --color-text-disabled:  #c5cad3;
-  --color-text-inverse:   #ffffff;     /* Text on dark surfaces */
-  --color-text-link:      #4a7cf4;
+  --color-text-primary:   #1f242c;     /* Headings, primary labels */
+  --color-text-secondary: #58606e;     /* Subtitles, descriptions, metadata */
+  --color-text-tertiary:  #8b94a2;     /* Placeholders, hints, subtle counters */
+  --color-text-disabled:  #c2c7cf;
+  --color-text-inverse:   #ffffff;
+  --color-text-link:      #1a73e8;
 
-  /* Brand / Action */
-  --color-brand:          #4a7cf4;     /* Primary brand blue */
-  --color-brand-hover:    #3d6de0;
-  --color-brand-active:   #3260cb;
-  --color-brand-subtle:   #eef2fe;     /* Brand tint for backgrounds */
-  --color-brand-text:     #2d52b8;     /* Brand text on light bg */
+  /* Brand / Primary Action (Trustworthy utility blue) */
+  --color-brand:          #1a73e8;
+  --color-brand-hover:    #1557b0;
+  --color-brand-active:   #0d47a1;
+  --color-brand-subtle:   #edf4fe;
+  --color-brand-text:     #174ea6;
 
-  /* Semantic */
-  --color-success:        #1a7f4b;
-  --color-success-bg:     #edfaf3;
-  --color-warning:        #a45c00;
-  --color-warning-bg:     #fff8ed;
-  --color-error:          #c0392b;
-  --color-error-bg:       #fdf3f2;
-  --color-error-border:   #f5c6c2;
-  --color-info:           #1565c0;
+  /* Semantic Feedback */
+  --color-success:        #137333;
+  --color-success-bg:     #e6f4ea;
+  --color-warning:        #b06000;
+  --color-warning-bg:     #fef7e0;
+  --color-error:          #c5221f;
+  --color-error-bg:       #fce8e6;
+  --color-error-border:   #fad2cf;
+  --color-info:           #1a73e8;
   --color-info-bg:        #e8f0fe;
 
-  /* Sidebar nav */
-  --color-nav-text:       #5f6470;
-  --color-nav-text-active:#1a1d23;
-  --color-nav-icon:       #9ba3af;
-  --color-nav-icon-active:#4a7cf4;
-  --color-nav-active-bg:  #eef2fe;
-  --color-nav-hover-bg:   #f5f6f8;
+  /* Sidebar Navigation */
+  --color-nav-text:        #505866;
+  --color-nav-text-active: #1a73e8;
+  --color-nav-icon:        #6b7382;
+  --color-nav-icon-active: #1a73e8;
+  --color-nav-active-bg:   #e2edfc;
+  --color-nav-hover-bg:    #e4e8ee;
 
-  /* Shadows */
-  --shadow-xs:  0 1px 2px rgba(0,0,0,0.06);
-  --shadow-sm:  0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md:  0 4px 8px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
-  --shadow-lg:  0 12px 24px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.04);
+  /* Restrained Shadows (Subtle, desktop-grade) */
+  --shadow-xs:  0 1px 2px rgba(0,0,0,0.04);
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.03);
+  --shadow-md:  0 3px 6px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-lg:  0 10px 20px rgba(0,0,0,0.09), 0 2px 6px rgba(0,0,0,0.04);
 }
 
-/* ─── Dark theme ────────────────────────────────────────────────────────── */
+/* ─── Dark theme (Desktop dark, not inverted) ────────────────────────────── */
 [data-theme="dark"] {
   color-scheme: dark;
 
   /* Surface */
-  --color-bg-app:       #111318;
-  --color-bg-sidebar:   #1a1d24;
-  --color-bg-surface:   #1e2128;
-  --color-bg-elevated:  #252931;
-  --color-bg-sunken:    #15181f;
-  --color-bg-hover:     #252931;
-  --color-bg-selected:  #1e2e55;
-  --color-bg-overlay:   rgba(0,0,0,0.55);
+  --color-bg-app:        #1b1c1e;      /* Neutral dark desktop canvas */
+  --color-bg-sidebar:    #161718;      /* Deeper navigation column */
+  --color-bg-surface:    #222326;      /* Document workspaces, file lists */
+  --color-bg-elevated:   #2a2b2f;      /* Dialogs, menus */
+  --color-bg-sunken:     #17181a;      /* Inputs, table headers */
+  --color-bg-hover:      #2b2c31;      /* Hover state */
+  --color-bg-selected:   #22324e;      /* Selection */
+  --color-bg-overlay:    rgba(0,0,0,0.65);
 
-  /* Border */
-  --color-border:       #2e3340;
-  --color-border-focus: #6b9cf8;
-  --color-border-subtle:#232732;
+  /* Borders */
+  --color-border:        #32343a;      /* Clean structural separators */
+  --color-border-focus:  #4285f4;
+  --color-border-subtle: #27282e;
 
   /* Text */
-  --color-text-primary:   #e8eaf0;
-  --color-text-secondary: #9ba3af;
-  --color-text-tertiary:  #636b78;
-  --color-text-disabled:  #3d4350;
-  --color-text-inverse:   #111318;
-  --color-text-link:      #6b9cf8;
+  --color-text-primary:   #e3e5ea;
+  --color-text-secondary: #9da3af;
+  --color-text-tertiary:  #676d78;
+  --color-text-disabled:  #41454e;
+  --color-text-inverse:   #161718;
+  --color-text-link:      #8ab4f8;
 
   /* Brand / Action */
-  --color-brand:          #6b9cf8;
-  --color-brand-hover:    #7eabff;
-  --color-brand-active:   #91b9ff;
-  --color-brand-subtle:   #1a2445;
-  --color-brand-text:     #a8c4ff;
+  --color-brand:          #4285f4;
+  --color-brand-hover:    #5b95f6;
+  --color-brand-active:   #79a8f8;
+  --color-brand-subtle:   #1a2a44;
+  --color-brand-text:     #aecbfa;
 
-  /* Semantic */
-  --color-success:        #34d07f;
-  --color-success-bg:     #0d2a1c;
-  --color-warning:        #ffa640;
-  --color-warning-bg:     #271a06;
-  --color-error:          #f07070;
-  --color-error-bg:       #2a1212;
-  --color-error-border:   #5a1e1e;
-  --color-info:           #6b9cf8;
-  --color-info-bg:        #151e3a;
+  /* Semantic Feedback */
+  --color-success:        #34a853;
+  --color-success-bg:     #0e2a18;
+  --color-warning:        #f9ab00;
+  --color-warning-bg:     #2b1f05;
+  --color-error:          #ea4335;
+  --color-error-bg:       #2b1312;
+  --color-error-border:   #541d1a;
+  --color-info:           #4285f4;
+  --color-info-bg:        #15233c;
 
-  /* Sidebar nav */
-  --color-nav-text:       #9ba3af;
-  --color-nav-text-active:#e8eaf0;
-  --color-nav-icon:       #636b78;
-  --color-nav-icon-active:#6b9cf8;
-  --color-nav-active-bg:  #1a2445;
-  --color-nav-hover-bg:   #252931;
+  /* Sidebar Navigation */
+  --color-nav-text:        #9da3af;
+  --color-nav-text-active: #ffffff;
+  --color-nav-icon:        #737984;
+  --color-nav-icon-active: #4285f4;
+  --color-nav-active-bg:   #22314d;
+  --color-nav-hover-bg:    #222327;
 
-  /* Shadows (more visible on dark surfaces) */
-  --shadow-xs:  0 1px 2px rgba(0,0,0,0.30);
-  --shadow-sm:  0 1px 3px rgba(0,0,0,0.40), 0 1px 2px rgba(0,0,0,0.20);
-  --shadow-md:  0 4px 8px rgba(0,0,0,0.40), 0 2px 4px rgba(0,0,0,0.20);
-  --shadow-lg:  0 12px 24px rgba(0,0,0,0.50), 0 4px 8px rgba(0,0,0,0.25);
+  /* Restrained Shadows */
+  --shadow-xs:  0 1px 2px rgba(0,0,0,0.25);
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.30), 0 1px 2px rgba(0,0,0,0.15);
+  --shadow-md:  0 3px 6px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.20);
+  --shadow-lg:  0 10px 24px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.25);
 }
 
 /* ─── Typography ────────────────────────────────────────────────────────── */
 :root {
-  --font-family:        'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-mono:          'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  --font-family:        'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono:          ui-monospace, SFMono-Regular, 'Cascadia Code', 'Consolas', monospace;
 
   --font-size-xs:       11px;
   --font-size-sm:       12px;
@@ -146,23 +146,23 @@
   --font-size-md:       14px;
   --font-size-lg:       16px;
   --font-size-xl:       18px;
-  --font-size-2xl:      22px;
-  --font-size-3xl:      28px;
+  --font-size-2xl:      20px;
+  --font-size-3xl:      24px;
 
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
+  --font-weight-normal:   400;
+  --font-weight-medium:   500;
   --font-weight-semibold: 600;
-  --font-weight-bold:   700;
+  --font-weight-bold:     700;
 
-  --line-height-tight:  1.2;
-  --line-height-base:   1.5;
-  --line-height-loose:  1.75;
+  --line-height-tight:  1.25;
+  --line-height-base:   1.45;
+  --line-height-loose:  1.65;
 
-  --letter-spacing-tight: -0.02em;
+  --letter-spacing-tight: -0.015em;
   --letter-spacing-base:  0;
-  --letter-spacing-wide:  0.04em;
+  --letter-spacing-wide:  0.03em;
 
-/* ─── Spacing scale ──────────────────────────────────────────────────────── */
+/* ─── Spacing Scale ──────────────────────────────────────────────────────── */
   --space-0:   0px;
   --space-1:   2px;
   --space-2:   4px;
@@ -174,28 +174,28 @@
   --space-8:   16px;
   --space-10:  20px;
   --space-12:  24px;
-  --space-14:  28px;
   --space-16:  32px;
   --space-20:  40px;
   --space-24:  48px;
-  --space-32:  64px;
 
-/* ─── Border radius ──────────────────────────────────────────────────────── */
-  --radius-sm:    3px;
+/* ─── Border Radius (Restrained desktop curvature) ───────────────────────── */
+  --radius-xs:    2px;
+  --radius-sm:    4px;
   --radius-md:    6px;
   --radius-lg:    8px;
-  --radius-xl:    12px;
+  --radius-xl:    10px;
   --radius-full:  9999px;
 
 /* ─── Transitions ────────────────────────────────────────────────────────── */
   --duration-fast:   80ms;
-  --duration-base:   150ms;
-  --duration-slow:   250ms;
+  --duration-base:   140ms;
+  --duration-slow:   220ms;
   --ease-standard:   cubic-bezier(0.2, 0, 0, 1);
   --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
 
-/* ─── Layout ─────────────────────────────────────────────────────────────── */
-  --sidebar-width:      220px;
-  --topbar-height:      48px;
-  --content-max-width:  900px;
+/* ─── Desktop Layout Constraints ─────────────────────────────────────────── */
+  --sidebar-width:            224px;
+  --topbar-height:            44px;
+  --content-max-width:        1080px;
+  --content-max-width-wide:   1240px;
 }

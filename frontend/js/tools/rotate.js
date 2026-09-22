@@ -4,13 +4,14 @@
  */
 'use strict';
 import * as api from '../api.js';
-import { isPdf, escapeHtml } from '../utils.js';
+import { isPdf, escapeHtml, recordRecentJob } from '../utils.js';
 import { createDropzone } from '../components/dropzone.js';
 import { createProgressView } from '../components/progress.js';
 
 export function renderRotate(container) {
   let selectedFile = null;
   let docInfo = null;
+  let isProcessing = false;
 
   const panel = document.createElement('div');
   panel.className = 'tool-panel';
@@ -19,26 +20,31 @@ export function renderRotate(container) {
       <h1 class="page-header__title">Rotate Pages</h1>
       <p class="page-header__subtitle">Rotate all pages in a PDF by 90°, 180°, or 270°.</p>
     </div>
-    <div class="tool-workspace" style="display:flex;flex-direction:column;gap:var(--space-6);">
+    <div class="workspace-flow">
       <div id="rotate-dropzone"></div>
-      <div id="rotate-options" class="card" style="display:none;">
-        <div class="card__header"><div class="card__title" id="rotate-filename"></div></div>
-        <div class="card__body">
-          <label style="font-size:var(--font-size-sm);font-weight:var(--font-weight-medium);display:block;margin-bottom:var(--space-3);">Rotation</label>
+      <div id="rotate-options" class="workspace-section" style="display:none;">
+        <div class="workspace-section__header">
+          <div style="display:flex;align-items:center;gap:var(--space-3);">
+            <i data-lucide="rotate-cw" style="width:16px;height:16px;color:var(--color-brand);"></i>
+            <span class="workspace-section__title" id="rotate-filename"></span>
+          </div>
+        </div>
+        <div style="padding:var(--space-5);">
+          <label style="font-size:var(--font-size-xs);font-weight:var(--font-weight-semibold);color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:var(--letter-spacing-wide);display:block;margin-bottom:var(--space-3);">Rotation Angle</label>
           <div style="display:flex;gap:var(--space-3);flex-wrap:wrap;">
-            <label style="display:flex;align-items:center;gap:var(--space-2);padding:var(--space-3) var(--space-4);border-radius:var(--radius-md);border:1px solid var(--color-border);cursor:pointer;">
-              <input type="radio" name="rotation" value="90" checked style="accent-color:var(--color-brand);"> <span style="font-size:var(--font-size-sm);">90° Clockwise</span>
+            <label style="display:flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-4);border-radius:var(--radius-sm);border:1px solid var(--color-border);cursor:pointer;background:var(--color-bg-surface);">
+              <input type="radio" name="rotation" value="90" checked style="accent-color:var(--color-brand);"> <span style="font-size:var(--font-size-base);">90° Clockwise</span>
             </label>
-            <label style="display:flex;align-items:center;gap:var(--space-2);padding:var(--space-3) var(--space-4);border-radius:var(--radius-md);border:1px solid var(--color-border);cursor:pointer;">
-              <input type="radio" name="rotation" value="180" style="accent-color:var(--color-brand);"> <span style="font-size:var(--font-size-sm);">180°</span>
+            <label style="display:flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-4);border-radius:var(--radius-sm);border:1px solid var(--color-border);cursor:pointer;background:var(--color-bg-surface);">
+              <input type="radio" name="rotation" value="180" style="accent-color:var(--color-brand);"> <span style="font-size:var(--font-size-base);">180°</span>
             </label>
-            <label style="display:flex;align-items:center;gap:var(--space-2);padding:var(--space-3) var(--space-4);border-radius:var(--radius-md);border:1px solid var(--color-border);cursor:pointer;">
-              <input type="radio" name="rotation" value="270" style="accent-color:var(--color-brand);"> <span style="font-size:var(--font-size-sm);">90° Counter-clockwise</span>
+            <label style="display:flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-4);border-radius:var(--radius-sm);border:1px solid var(--color-border);cursor:pointer;background:var(--color-bg-surface);">
+              <input type="radio" name="rotation" value="270" style="accent-color:var(--color-brand);"> <span style="font-size:var(--font-size-base);">90° Counter-clockwise</span>
             </label>
           </div>
         </div>
-        <div class="card__footer" style="justify-content:flex-end;">
-          <button type="button" class="btn btn--primary" id="rotate-btn"><i data-lucide="rotate-cw"></i><span>Rotate All Pages</span></button>
+        <div style="padding:var(--space-3) var(--space-4);background:var(--color-bg-sunken);border-top:1px solid var(--color-border);display:flex;justify-content:flex-end;">
+          <button type="button" class="btn btn--primary btn--lg" id="rotate-btn"><i data-lucide="rotate-cw"></i><span>Rotate All Pages</span></button>
         </div>
       </div>
       <div id="rotate-progress" style="display:none;"></div>
@@ -85,8 +91,10 @@ export function renderRotate(container) {
         pv.update({ current: job.current, total: job.total, message: job.message, status: 'Processing' });
       });
       const filesRes = await api.listOutputs(result.job_id).catch(() => ({ files: [] }));
+      const outName = filesRes.files?.[0]?.name || result.output_name;
+      recordRecentJob('Rotate Pages', outName, `/api/output/${result.job_id}/download/${encodeURIComponent(outName)}`);
       pv.showSuccess({
-        title: 'Rotation Complete!',
+        title: 'Rotation Complete',
         message: `Rotated ${docInfo.page_count} pages by ${rotation}°.`,
         actions: [
           { label: 'Download', icon: 'download', variant: 'primary',

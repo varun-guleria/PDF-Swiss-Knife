@@ -3,7 +3,7 @@
  */
 'use strict';
 import * as api from '../api.js';
-import { isImage, formatFileSize, escapeHtml } from '../utils.js';
+import { isImage, formatFileSize, escapeHtml, recordRecentJob } from '../utils.js';
 import { createDropzone } from '../components/dropzone.js';
 import { createFileList } from '../components/fileRow.js';
 import { createProgressView } from '../components/progress.js';
@@ -21,20 +21,21 @@ export function renderToPdf(container) {
       <h1 class="page-header__title">Images → PDF</h1>
       <p class="page-header__subtitle">Combine multiple images into a single PDF document. Supports PNG, JPEG, and other common image formats.</p>
     </div>
-    <div class="tool-workspace" style="display:flex;flex-direction:column;gap:var(--space-6);">
+    <div class="workspace-flow">
       <div id="topdf-dropzone"></div>
-      <div id="topdf-filelist-card" class="card" style="display:none;">
-        <div class="card__header" style="justify-content:space-between;">
+      <div id="topdf-filelist-card" class="workspace-section" style="display:none;">
+        <div class="workspace-section__header">
           <div style="display:flex;align-items:center;gap:var(--space-3);">
-            <div class="card__title">Images</div>
-            <span id="topdf-count" class="badge badge--brand">0</span>
+            <i data-lucide="image" style="width:16px;height:16px;color:var(--color-brand);"></i>
+            <span class="workspace-section__title">Selected Images</span>
+            <span id="topdf-count" class="badge badge--default">0</span>
           </div>
           <button type="button" id="topdf-clear" class="btn btn--ghost btn--sm btn--danger"><i data-lucide="trash-2"></i><span>Clear</span></button>
         </div>
-        <div id="topdf-filelist" class="card__body" style="padding:0;"></div>
-        <div class="card__footer" style="justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);">
+        <div id="topdf-filelist" style="padding:0;"></div>
+        <div style="padding:var(--space-3) var(--space-4);background:var(--color-bg-sunken);border-top:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);">
           <div style="display:flex;align-items:center;gap:var(--space-3);flex:1;min-width:200px;">
-            <label for="topdf-output" style="font-size:var(--font-size-sm);white-space:nowrap;">Output:</label>
+            <label for="topdf-output" style="font-size:var(--font-size-xs);font-weight:var(--font-weight-semibold);color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:var(--letter-spacing-wide);white-space:nowrap;">Output Name:</label>
             <input type="text" class="input" id="topdf-output" value="images_combined.pdf" style="max-width:250px;">
           </div>
           <button type="button" id="topdf-btn" class="btn btn--primary btn--lg" disabled><i data-lucide="file-image"></i><span>Create PDF</span></button>
@@ -107,8 +108,9 @@ export function renderToPdf(container) {
         pv.update({ current: job.current, total: job.total, message: job.message, status: 'Processing' });
       });
       const filesRes = await api.listOutputs(job_id).catch(() => ({ files: [] }));
+      recordRecentJob('Images → PDF', outputName, `/api/output/${job_id}/download/${encodeURIComponent(outputName)}`);
       pv.showSuccess({
-        title: 'PDF Created!', message: finalStatus.message || `Created PDF with ${selectedFiles.length} pages.`,
+        title: 'PDF Created', message: finalStatus.message || `Created PDF with ${selectedFiles.length} pages.`,
         actions: [
           { label: 'Download PDF', icon: 'download', variant: 'primary',
             onClick: () => api.downloadFile(job_id, filesRes.files?.[0]?.name || outputName) },

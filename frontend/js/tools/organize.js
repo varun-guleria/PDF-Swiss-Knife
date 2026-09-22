@@ -9,7 +9,7 @@
 'use strict';
 
 import * as api from '../api.js';
-import { isPdf, escapeHtml } from '../utils.js';
+import { isPdf, escapeHtml, recordRecentJob } from '../utils.js';
 import { createDropzone } from '../components/dropzone.js';
 import { createProgressView } from '../components/progress.js';
 import { confirmDialog, alertDialog } from '../components/dialog.js';
@@ -33,13 +33,13 @@ export function renderOrganize(container) {
       <p class="page-header__subtitle">Visual page management: reorder, rotate, duplicate, or remove pages.</p>
     </div>
 
-    <div id="organize-workspace" class="tool-workspace" style="display:flex;flex-direction:column;gap:var(--space-6);">
+    <div id="organize-workspace" class="workspace-flow">
       <!-- Dropzone (initial upload) -->
       <div id="organize-dropzone-container"></div>
 
       <!-- Loading skeleton / inspection spinner -->
-      <div id="organize-loading" class="card" style="display:none;">
-        <div class="card__body" style="text-align:center;padding:var(--space-12);">
+      <div id="organize-loading" class="workspace-section" style="display:none;">
+        <div style="text-align:center;padding:var(--space-12);">
           <div class="spinner spinner--lg" style="margin:0 auto var(--space-4);"></div>
           <div style="font-size:var(--font-size-md);font-weight:var(--font-weight-medium);">Inspecting PDF & generating thumbnails…</div>
           <div style="font-size:var(--font-size-sm);color:var(--color-text-secondary);margin-top:var(--space-2);">This takes only a moment.</div>
@@ -47,11 +47,12 @@ export function renderOrganize(container) {
       </div>
 
       <!-- Pages Workspace -->
-      <div id="organize-pages-card" class="card" style="display:none;">
-        <div class="card__header" style="justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);">
+      <div id="organize-pages-card" class="workspace-section" style="display:none;">
+        <div class="workspace-section__header" style="flex-wrap:wrap;gap:var(--space-4);">
           <div style="display:flex;align-items:center;gap:var(--space-3);">
-            <div id="organize-doc-title" class="card__title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px;">Document</div>
-            <span id="organize-page-count-badge" class="badge badge--brand">0 pages</span>
+            <i data-lucide="layout-grid" style="width:16px;height:16px;color:var(--color-brand);"></i>
+            <span id="organize-doc-title" class="workspace-section__title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px;">Document</span>
+            <span id="organize-page-count-badge" class="badge badge--default">0 pages</span>
           </div>
 
           <!-- Batch Action Controls -->
@@ -75,13 +76,13 @@ export function renderOrganize(container) {
           </div>
         </div>
 
-        <div class="card__body" style="padding:var(--space-6);">
+        <div style="padding:var(--space-5);">
           <div id="organize-grid" class="pages-grid" role="list" aria-label="Page thumbnail list"></div>
         </div>
 
-        <div class="card__footer" style="flex-wrap:wrap;justify-content:space-between;gap:var(--space-4);">
+        <div style="padding:var(--space-3) var(--space-4);background:var(--color-bg-sunken);border-top:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);">
           <div style="display:flex;align-items:center;gap:var(--space-3);flex:1;min-width:260px;">
-            <label for="organize-output-name" style="font-size:var(--font-size-sm);font-weight:var(--font-weight-medium);color:var(--color-text-secondary);white-space:nowrap;">Output Name:</label>
+            <label for="organize-output-name" style="font-size:var(--font-size-xs);font-weight:var(--font-weight-semibold);color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:var(--letter-spacing-wide);white-space:nowrap;">Output Name:</label>
             <input type="text" id="organize-output-name" class="input" value="organized_document.pdf" style="max-width:280px;" />
           </div>
 
@@ -364,8 +365,10 @@ export function renderOrganize(container) {
       });
 
       // Complete
+      recordRecentJob('Organise Pages', outputName, `/api/output/${job_id}/download/${encodeURIComponent(outputName)}`);
+
       progressView.showSuccess({
-        title: 'Document Organized!',
+        title: 'Document Organized',
         message: `Successfully generated ${outputName} with ${pages.length} pages.`,
         actions: [
           {

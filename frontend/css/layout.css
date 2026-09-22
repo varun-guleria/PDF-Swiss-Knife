@@ -1,14 +1,10 @@
 /*
  * layout.css — Application shell layout.
  *
- * The app uses a fixed, three-region layout:
- *
- *  ┌──────────┬───────────────────────────────────┐
- *  │          │  Topbar                            │
- *  │ Sidebar  ├───────────────────────────────────┤
- *  │          │  Content Area (scrollable)         │
- *  │          │                                    │
- *  └──────────┴───────────────────────────────────┘
+ * Professional desktop utility layout:
+ * - Sidebar navigation with clear categories and active indicator
+ * - Minimal topbar with breadcrumb/title and theme controls
+ * - Spacious, scrollable productivity content canvas
  */
 
 /* ─── App shell ──────────────────────────────────────────────────────────── */
@@ -17,6 +13,7 @@
   height: 100vh;
   width: 100vw;
   overflow: hidden;
+  background-color: var(--color-bg-app);
 }
 
 /* ─── Sidebar ────────────────────────────────────────────────────────────── */
@@ -31,39 +28,43 @@
   overflow: hidden;
   flex-shrink: 0;
   z-index: 10;
+  user-select: none;
 }
 
 .sidebar__logo {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-5) var(--space-6);
+  padding: 0 var(--space-4);
   height: var(--topbar-height);
   border-bottom: 1px solid var(--color-border-subtle);
   flex-shrink: 0;
+  background-color: var(--color-bg-sidebar);
 }
 
 .sidebar__logo-icon {
-  width: 24px;
-  height: 24px;
-  color: var(--color-brand);
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-xs);
+  object-fit: contain;
   flex-shrink: 0;
 }
 
 .sidebar__logo-text {
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   letter-spacing: var(--letter-spacing-tight);
   white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sidebar__nav {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: var(--space-4) 0;
+  padding: var(--space-3) 0 var(--space-6);
 }
 
 .nav-section {
@@ -76,35 +77,36 @@
   letter-spacing: var(--letter-spacing-wide);
   text-transform: uppercase;
   color: var(--color-text-tertiary);
-  padding: var(--space-5) var(--space-6) var(--space-2);
+  padding: var(--space-3) var(--space-4) var(--space-1);
 }
 
 .nav-item {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-2) var(--space-6);
-  height: 32px;
+  padding: 0 var(--space-3);
+  margin: 1px var(--space-2);
+  height: 30px;
   cursor: pointer;
-  border-radius: 0;
+  border-radius: var(--radius-sm);
   color: var(--color-nav-text);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-normal);
   white-space: nowrap;
   overflow: hidden;
-  transition: background-color var(--duration-fast) var(--ease-standard),
-              color var(--duration-fast) var(--ease-standard);
-  user-select: none;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
   border: none;
   background: none;
-  width: 100%;
+  width: calc(100% - var(--space-4));
   text-align: left;
   position: relative;
 }
 
 .nav-item:hover {
   background-color: var(--color-nav-hover-bg);
-  color: var(--color-nav-text-active);
+  color: var(--color-text-primary);
 }
 
 .nav-item.active {
@@ -117,22 +119,25 @@
   content: '';
   position: absolute;
   left: 0;
-  top: 0;
-  bottom: 0;
+  top: 4px;
+  bottom: 4px;
   width: 3px;
   background-color: var(--color-brand);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  border-radius: var(--radius-xs);
 }
 
 .nav-item__icon {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   flex-shrink: 0;
   color: var(--color-nav-icon);
   transition: color var(--duration-fast) var(--ease-standard);
 }
 
-.nav-item:hover .nav-item__icon,
+.nav-item:hover .nav-item__icon {
+  color: var(--color-text-primary);
+}
+
 .nav-item.active .nav-item__icon {
   color: var(--color-nav-icon-active);
 }
@@ -145,18 +150,22 @@
 }
 
 .nav-item__badge {
-  font-size: var(--font-size-xs);
-  background-color: var(--color-brand);
-  color: white;
-  padding: 1px 5px;
-  border-radius: var(--radius-full);
-  font-weight: var(--font-weight-medium);
+  font-size: 10px;
+  background-color: var(--color-bg-sunken);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  padding: 0 5px;
+  border-radius: var(--radius-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.04em;
   flex-shrink: 0;
+  line-height: 1.4;
 }
 
-/* Home nav item (no section label) */
-.nav-home {
-  padding: var(--space-3) var(--space-4) var(--space-2);
+.nav-item.active .nav-item__badge {
+  background-color: var(--color-brand);
+  color: #ffffff;
+  border-color: var(--color-brand);
 }
 
 /* ─── Main area ──────────────────────────────────────────────────────────── */
@@ -177,7 +186,7 @@
   display: flex;
   align-items: center;
   padding: 0 var(--space-8);
-  gap: var(--space-8);
+  gap: var(--space-6);
   flex-shrink: 0;
   z-index: 5;
 }
@@ -190,9 +199,22 @@
   color: var(--color-text-secondary);
 }
 
+.topbar__breadcrumb .section-label {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-text-tertiary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.topbar__breadcrumb .sep {
+  color: var(--color-border);
+  font-size: var(--font-size-sm);
+}
+
 .topbar__breadcrumb .current {
   color: var(--color-text-primary);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
 }
 
 .topbar__spacer {
@@ -203,6 +225,24 @@
   display: flex;
   align-items: center;
   gap: var(--space-4);
+}
+
+.topbar__meta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-sunken);
+  border: 1px solid var(--color-border-subtle);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.topbar__meta-badge svg {
+  width: 12px;
+  height: 12px;
+  color: var(--color-success);
 }
 
 /* ─── Content area ───────────────────────────────────────────────────────── */
@@ -216,31 +256,29 @@
 .content-inner {
   max-width: var(--content-max-width);
   margin: 0 auto;
-  padding: var(--space-8);
+  padding: var(--space-8) var(--space-8);
 }
 
-/* Wide variant — for tools that need more space */
+/* Wide variant for tables, batch builder, page organizer */
 .content-inner--wide {
-  max-width: 1100px;
-}
-
-/* Full width — no max-width constraint */
-.content-inner--full {
-  max-width: none;
-  padding: var(--space-8);
+  max-width: var(--content-max-width-wide);
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-8);
 }
 
 /* ─── Page header ────────────────────────────────────────────────────────── */
 .page-header {
-  margin-bottom: var(--space-8);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .page-header__title {
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   letter-spacing: var(--letter-spacing-tight);
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-1);
 }
 
 .page-header__subtitle {

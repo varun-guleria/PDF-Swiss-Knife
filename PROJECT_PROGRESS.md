@@ -244,6 +244,43 @@ Implement the complete set of professional PDF tools across Organise, Edit, Conv
 
 ---
 
+### M7 — Desktop-Style Productivity UI/UX Redesign
+**Status: COMPLETE**  
+**Date: 2026-09-22**
+
+#### Objective
+Transform the user interface into a mature, desktop-class local productivity workspace (inspired by the usability philosophy of desktop utilities like Google Drive/Docs and native file managers, without cloning branding or layouts):
+- Completely replace the repetitive 4-column card grid with a task-oriented Home view ("What would you like to do?").
+- Implement a reusable, desktop-grade file manager table/list component with drag handles, file extension badges, page counts, sizes, replace, and remove actions.
+- Build a dedicated document-building workspace for the Custom Batch PDF Builder with dynamic repeating slots (`[-] N [+]`), slot replacement preservation, and a restrained summary panel.
+- Refine centralized design tokens (`tokens.css`) for both Light and Dark modes (genuine desktop dark, neutral hairlines, restrained curvature, no SaaS gradients/glowing neon).
+- Eliminate all template tropes (floating card clutter, large marketing cards, oversized controls, arbitrary colors) in favor of productivity-oriented density.
+
+#### Completed
+- [x] Design tokens: `frontend/css/tokens.css` updated with desktop palettes, neutral dark mode, restrained borders, and desktop spacing.
+- [x] Layout shell: `frontend/css/layout.css` updated with refined desktop sidebar navigation, 44px compact titlebar, and wide workspace support.
+- [x] Components: `frontend/css/components.css` updated with solid buttons, desktop file manager table/list styling, clean dropzone, empty states, and stepper counter.
+- [x] File row component: `frontend/js/components/fileRow.js` upgraded with tabular layout, drag handle, file extension badge, size, page count, replace action, reorder, and remove.
+- [x] Home panel: `frontend/js/tools/home.js` redesigned into a task-oriented workspace with 4 prominent common actions, structured utility directory, and session activity tracking with empty state.
+- [x] Tools CSS: `frontend/css/tools.css` redesigned for desktop workspace flow, action tiles, directory list, and batch builder workspace.
+- [x] Custom Batch Builder: `frontend/js/tools/batch.js` redesigned into a dedicated document-building workspace with dynamic repeating slots (`[-] N [+]`), slot replacement preservation, unique file manager, and restrained summary panel.
+- [x] Tool workspaces: `merge.js`, `organize.js`, `extract.js`, `rotate.js`, `toPdf.js`, `info.js`, `split.js`, and `singleFileTool.js` refined to eliminate card clutter and adopt `.workspace-flow` and `.workspace-section`.
+- [x] Session activity logging: `recordRecentJob` added in `frontend/js/utils.js` and wired to tool completions.
+- [x] Navigation: `frontend/js/app.js` updated with exact navigation labels, offline badge, and wide canvas routing.
+- [x] Verification test suite: `tests/test_ui_redesign_verification.py` created with 6 automated tests validating all UI/UX redesign requirements.
+
+#### Verification
+1. **Application Starts**: Verified server is running on `127.0.0.1:5000` with HTTP 200 and healthy JSON response.
+2. **Home Screen**: Verified task-oriented structure ("What would you like to do?"), prominent common action tiles, structured all-tools directory, and session activity empty state. Repetitive 4-column card grid eliminated.
+3. **App Navigation**: Verified sidebar categories (ORGANISE, EDIT, CONVERT, OPTIMISE, SECURITY, ADVANCED), active indicators, and minimal topbar.
+4. **Light Mode**: Verified crisp, contrastive desktop utility colors, neutral surfaces, and clean borders.
+5. **Dark Mode**: Verified authentic desktop dark mode palette (`#1b1c1e`, `#161718`, `#222326`, `#32343a`) with comfortable legibility and persistent theme toggling.
+6. **Custom Batch Builder**: Verified dedicated document-building workspace, dynamic repeating slots (`[-] N [+]`), slot replacement without position loss, unique file manager, and restrained summary panel.
+7. **Dynamic Repeating Placeholders**: Verified stepper increments/decrements slots while preserving existing loaded documents and allowing in-place file replacement.
+8. **Functional Integrity**: All 57 automated tests passed (51 backend/utility tests + 6 UI redesign tests). Live server merge, page organization, and split tests verified.
+
+---
+
 ## Verification Log
 
 | Date | Milestone | Item | Result |
@@ -255,6 +292,7 @@ Implement the complete set of professional PDF tools across Organise, Edit, Conv
 | 2026-09-22 | M4 | Page Organization engine, thumbnail previews, UI | VERIFIED (4/4 tests passed + live test) |
 | 2026-09-22 | M5 | Batch PDF Builder engine, API, UI, ZIP download | VERIFIED (12/12 tests passed) |
 | 2026-09-22 | M6 | Complete PDF Utilities (14 tools, API, and UI) | VERIFIED (20/20 tests passed, 51/51 total) |
+| 2026-09-22 | M7 | Desktop-Style Productivity UI/UX Redesign | VERIFIED (6/6 new tests, 57/57 total + live tests) |
 
 ---
 
@@ -266,4 +304,5 @@ Implement the complete set of professional PDF tools across Organise, Edit, Conv
 
 ## Status: Complete
 
-All features outlined in the product plan are fully implemented, tested, verified, and ready for production use.
+All features and UI/UX redesign specifications outlined in the product plan and redesign directive are fully implemented, tested, verified, and ready for production use.
+

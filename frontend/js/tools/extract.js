@@ -4,7 +4,7 @@
  */
 'use strict';
 import * as api from '../api.js';
-import { isPdf, formatFileSize, escapeHtml } from '../utils.js';
+import { isPdf, formatFileSize, escapeHtml, recordRecentJob } from '../utils.js';
 import { createDropzone } from '../components/dropzone.js';
 import { createProgressView } from '../components/progress.js';
 
@@ -19,17 +19,22 @@ export function renderExtract(container) {
       <h1 class="page-header__title">Extract Pages</h1>
       <p class="page-header__subtitle">Select specific pages from a PDF and save them as a new document.</p>
     </div>
-    <div class="tool-workspace" style="display:flex;flex-direction:column;gap:var(--space-6);">
+    <div class="workspace-flow">
       <div id="extract-dropzone"></div>
-      <div id="extract-options" class="card" style="display:none;">
-        <div class="card__header"><div class="card__title" id="extract-filename"></div></div>
-        <div class="card__body">
-          <label style="font-size:var(--font-size-sm);font-weight:var(--font-weight-medium);display:block;margin-bottom:var(--space-2);">Pages to extract</label>
+      <div id="extract-options" class="workspace-section" style="display:none;">
+        <div class="workspace-section__header">
+          <div style="display:flex;align-items:center;gap:var(--space-3);">
+            <i data-lucide="copy" style="width:16px;height:16px;color:var(--color-brand);"></i>
+            <span class="workspace-section__title" id="extract-filename"></span>
+          </div>
+        </div>
+        <div style="padding:var(--space-5);">
+          <label style="font-size:var(--font-size-xs);font-weight:var(--font-weight-semibold);color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:var(--letter-spacing-wide);display:block;margin-bottom:var(--space-2);">Pages to extract</label>
           <input type="text" class="input" id="extract-pages-input" placeholder="e.g. 1, 3-5, 8" style="max-width:300px;">
           <div style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);margin-top:var(--space-2);" id="extract-page-hint">Enter page numbers or ranges</div>
         </div>
-        <div class="card__footer" style="justify-content:flex-end;">
-          <button type="button" class="btn btn--primary" id="extract-btn"><i data-lucide="copy"></i><span>Extract Pages</span></button>
+        <div style="padding:var(--space-3) var(--space-4);background:var(--color-bg-sunken);border-top:1px solid var(--color-border);display:flex;justify-content:flex-end;">
+          <button type="button" class="btn btn--primary btn--lg" id="extract-btn"><i data-lucide="copy"></i><span>Extract Pages</span></button>
         </div>
       </div>
       <div id="extract-progress" style="display:none;"></div>
@@ -95,8 +100,10 @@ export function renderExtract(container) {
         pv.update({ current: job.current, total: job.total, message: job.message, status: 'Processing' });
       });
       const filesRes = await api.listOutputs(result.job_id).catch(() => ({ files: [] }));
+      const outName = filesRes.files?.[0]?.name || result.output_name;
+      recordRecentJob('Extract Pages', outName, `/api/output/${result.job_id}/download/${encodeURIComponent(outName)}`);
       pv.showSuccess({
-        title: 'Extraction Complete!',
+        title: 'Extraction Complete',
         message: `Extracted ${specs.length} pages.`,
         actions: [
           { label: 'Download', icon: 'download', variant: 'primary',

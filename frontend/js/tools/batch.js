@@ -1,32 +1,34 @@
 /**
  * tools/batch.js — Custom Batch PDF Builder Tool.
  *
- * Allows users to define repeating PDFs (common pages merged into every output)
- * and unique PDFs (one per output document). Generates N output PDFs in the
- * background with live progress tracking and ZIP download.
- *
- * Output count = len(unique_pdfs).
- * Each output = repeating PDFs (in order) + one unique PDF.
+ * Dedicated document-building workspace:
+ * - REUSABLE / REPEATING DOCUMENTS: Dynamic placeholders controlled by [-] N [+].
+ *   Each slot supports Replace, Remove, Reorder. Slot structure remains when file is replaced.
+ * - UNIQUE DOCUMENTS: Clean file manager list (001, 002...) with Replace (position preserving) and Remove.
+ * - BATCH SUMMARY: Restrained summary panel showing slot count, unique count, output count,
+ *   document structure, and [ Generate PDFs ] action.
  */
 
 'use strict';
 
 import * as api from '../api.js';
-import { isPdf, formatFileSize, escapeHtml } from '../utils.js';
-import { createDropzone } from '../components/dropzone.js';
-import { createFileList } from '../components/fileRow.js';
+import { isPdf, formatFileSize, escapeHtml, recordRecentJob } from '../utils.js';
 import { createProgressView } from '../components/progress.js';
 import { confirmDialog } from '../components/dialog.js';
 
 /**
- * Render the Batch Builder tool panel.
+ * Render the Custom Batch PDF Builder tool.
  * @param {HTMLElement} container - Target container element
  */
 export function renderBatch(container) {
-  let repeatingFiles = [];  // Array of File objects
-  let uniqueFiles = [];     // Array of File objects
-  let repeatingListComponent = null;
-  let uniqueListComponent = null;
+  // State
+  let slotCounter = 1;
+  let repeatingSlots = [
+    { id: slotCounter++, file: null },
+    { id: slotCounter++, file: null },
+    { id: slotCounter++, file: null },
+  ];
+  let uniqueFiles = []; // Array of File objects
   let isProcessing = false;
 
   const panel = document.createElement('div');
@@ -36,113 +38,134 @@ export function renderBatch(container) {
     <div class="page-header">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);">
         <div>
-          <h1 class="page-header__title">Batch PDF Builder</h1>
-          <p class="page-header__subtitle">Combine repeating pages with unique documents to generate multiple personalised PDFs in one batch.</p>
+          <h1 class="page-header__title">Custom Batch PDF Builder</h1>
+          <p class="page-header__subtitle">Generate personalised output documents by combining shared repeating pages with unique files.</p>
         </div>
-        <span class="badge badge--brand" style="font-size:var(--font-size-xs);">PRO</span>
+        <span class="badge badge--brand">PRO</span>
       </div>
     </div>
 
-    <!-- Main Workspace Container -->
-    <div id="batch-workspace" class="tool-workspace" style="display:flex;flex-direction:column;gap:var(--space-6);">
+    <!-- Workspace Container -->
+    <div id="batch-workspace" class="batch-workspace">
 
-      <!-- How It Works -->
-      <div class="card" style="border-left:3px solid var(--color-brand);">
-        <div class="card__body" style="padding:var(--space-4) var(--space-5);">
-          <div style="display:flex;align-items:flex-start;gap:var(--space-4);">
-            <i data-lucide="info" style="width:20px;height:20px;color:var(--color-brand);flex-shrink:0;margin-top:2px;"></i>
-            <div style="font-size:var(--font-size-sm);color:var(--color-text-secondary);line-height:1.6;">
-              <strong style="color:var(--color-text-primary);">How it works:</strong>
-              Upload <strong>repeating PDFs</strong> (pages that appear in every output) and <strong>unique PDFs</strong> (one per output document).
-              The builder will generate one merged PDF for each unique file, combining the repeating pages + that unique file.
-            </div>
-          </div>
+      <!-- How It Works Hint Strip -->
+      <div class="batch-info-strip">
+        <i data-lucide="info"></i>
+        <div>
+          <strong>Document Architecture:</strong> Repeating pages (such as covers, terms, or certificates) are prepended in order to each unique document. One output PDF is created for every unique file.
         </div>
       </div>
 
-      <!-- ── Section 1: Repeating PDFs ─────────────────────────────── -->
-      <div class="card" id="batch-repeating-card">
-        <div class="card__header" style="justify-content:space-between;">
+      <!-- ── SECTION 1: REPEATING DOCUMENTS ────────────────────────── -->
+      <div class="workspace-section" id="batch-repeating-section">
+        <div class="workspace-section__header">
           <div style="display:flex;align-items:center;gap:var(--space-3);">
-            <i data-lucide="repeat" style="width:18px;height:18px;color:var(--color-brand);"></i>
-            <div class="card__title">Repeating PDFs</div>
-            <span id="batch-repeating-count" class="badge badge--default">0 files</span>
+            <i data-lucide="repeat" style="width:16px;height:16px;color:var(--color-brand);"></i>
+            <span class="workspace-section__title">Repeating PDFs</span>
+            <span id="batch-repeating-active-badge" class="badge badge--default">0 / 3 ready</span>
           </div>
-          <button type="button" id="batch-repeating-clear" class="btn btn--ghost btn--sm btn--danger" style="display:none;">
-            <i data-lucide="trash-2"></i>
-            <span>Clear</span>
-          </button>
+          <div style="display:flex;align-items:center;gap:var(--space-4);">
+            <div style="display:flex;align-items:center;gap:var(--space-2);">
+              <span style="font-size:var(--font-size-xs);color:var(--color-text-secondary);">Slots:</span>
+              <div class="counter" role="group" aria-label="Repeating placeholders count">
+                <button type="button" id="batch-slot-dec" class="counter__btn" title="Remove slot" aria-label="Decrease slot count">−</button>
+                <div id="batch-slot-count-val" class="counter__value">3</div>
+                <button type="button" id="batch-slot-inc" class="counter__btn" title="Add slot" aria-label="Increase slot count">+</button>
+              </div>
+            </div>
+            <button type="button" id="batch-repeating-clear-btn" class="btn btn--ghost btn--sm btn--danger" style="display:none;">
+              <i data-lucide="trash-2"></i>
+              <span>Clear Files</span>
+            </button>
+          </div>
         </div>
 
-        <div class="card__body" style="padding:0;">
-          <div style="padding:var(--space-3) var(--space-5);background:var(--color-surface-secondary);border-bottom:1px solid var(--color-border);">
-            <span style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);">
-              These pages will appear at the <strong>start</strong> of every output document, in the order shown below.
-            </span>
-          </div>
-          <div id="batch-repeating-dropzone" style="padding:var(--space-4);"></div>
-          <div id="batch-repeating-list"></div>
+        <div class="repeating-slots-container" id="repeating-slots-list">
+          <!-- Populated dynamically by renderRepeatingSlots() -->
         </div>
       </div>
 
-      <!-- ── Section 2: Unique PDFs ────────────────────────────────── -->
-      <div class="card" id="batch-unique-card">
-        <div class="card__header" style="justify-content:space-between;">
+      <!-- ── SECTION 2: UNIQUE DOCUMENTS ───────────────────────────── -->
+      <div class="workspace-section" id="batch-unique-section">
+        <div class="workspace-section__header">
           <div style="display:flex;align-items:center;gap:var(--space-3);">
-            <i data-lucide="file-plus" style="width:18px;height:18px;color:var(--color-warning);"></i>
-            <div class="card__title">Unique PDFs</div>
-            <span id="batch-unique-count" class="badge badge--default">0 files</span>
+            <i data-lucide="files" style="width:16px;height:16px;color:var(--color-brand);"></i>
+            <span class="workspace-section__title">Unique Documents</span>
+            <span id="batch-unique-count-badge" class="badge badge--default">0 files</span>
           </div>
-          <button type="button" id="batch-unique-clear" class="btn btn--ghost btn--sm btn--danger" style="display:none;">
-            <i data-lucide="trash-2"></i>
-            <span>Clear</span>
-          </button>
+          <div style="display:flex;align-items:center;gap:var(--space-3);">
+            <button type="button" id="batch-add-unique-btn" class="btn btn--secondary btn--sm">
+              <i data-lucide="plus"></i>
+              <span>Add Files</span>
+            </button>
+            <button type="button" id="batch-unique-clear-btn" class="btn btn--ghost btn--sm btn--danger" style="display:none;">
+              <i data-lucide="trash-2"></i>
+              <span>Clear All</span>
+            </button>
+          </div>
         </div>
 
-        <div class="card__body" style="padding:0;">
-          <div style="padding:var(--space-3) var(--space-5);background:var(--color-surface-secondary);border-bottom:1px solid var(--color-border);">
-            <span style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);">
-              One output PDF will be generated <strong>for each</strong> unique file uploaded here.
-            </span>
+        <div class="workspace-section__body" style="padding:var(--space-4);">
+          <!-- Drop area for unique files -->
+          <div id="unique-dropzone-wrap" style="margin-bottom:var(--space-3);">
+            <div id="unique-dropzone" class="dropzone dropzone--compact" role="button" tabindex="0">
+              <i data-lucide="upload-cloud" class="dropzone__icon"></i>
+              <div class="dropzone__title">Drop unique PDF files here, or click to browse</div>
+              <div class="dropzone__subtitle">(One output PDF generated per unique document)</div>
+            </div>
           </div>
-          <div id="batch-unique-dropzone" style="padding:var(--space-4);"></div>
-          <div id="batch-unique-list"></div>
+
+          <!-- File manager list for unique documents -->
+          <div id="unique-files-container">
+            <div class="file-manager" id="unique-file-manager" style="display:none;">
+              <div class="file-list__header">
+                <div class="file-list__th file-list__th--index">#</div>
+                <div class="file-list__th file-list__th--name">Document</div>
+                <div class="file-list__th file-list__th--meta">Size</div>
+                <div class="file-list__th file-list__th--actions">Actions</div>
+              </div>
+              <div class="file-list" id="unique-file-list"></div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- ── Section 3: Preview Summary & Generate ─────────────────── -->
-      <div class="card" id="batch-summary-card" style="display:none;">
-        <div class="card__body">
-          <div style="display:flex;align-items:center;justify-content:center;gap:var(--space-6);flex-wrap:wrap;">
-            <div style="text-align:center;">
-              <div style="font-size:var(--font-size-2xl);font-weight:var(--font-weight-bold);color:var(--color-brand);" id="batch-summary-repeating">0</div>
-              <div style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);">Repeating</div>
+      <!-- ── SECTION 3: BATCH SUMMARY ──────────────────────────────── -->
+      <div class="batch-summary-panel" id="batch-summary-panel">
+        <div class="batch-summary-panel__header">BATCH SUMMARY</div>
+        <div class="batch-summary-panel__body">
+          <div class="batch-summary-stats">
+            <div class="batch-summary-item">
+              <span class="batch-summary-item__label">Repeating PDFs</span>
+              <span class="batch-summary-item__val" id="summary-stat-repeating">0</span>
             </div>
-            <div style="font-size:var(--font-size-xl);color:var(--color-text-tertiary);">×</div>
-            <div style="text-align:center;">
-              <div style="font-size:var(--font-size-2xl);font-weight:var(--font-weight-bold);color:var(--color-warning);" id="batch-summary-unique">0</div>
-              <div style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);">Unique</div>
+            <div style="font-size:var(--font-size-lg);color:var(--color-text-tertiary);">&times;</div>
+            <div class="batch-summary-item">
+              <span class="batch-summary-item__label">Unique PDFs</span>
+              <span class="batch-summary-item__val" id="summary-stat-unique">0</span>
             </div>
-            <div style="font-size:var(--font-size-xl);color:var(--color-text-tertiary);">→</div>
-            <div style="text-align:center;">
-              <div style="font-size:var(--font-size-2xl);font-weight:var(--font-weight-bold);color:var(--color-success);" id="batch-summary-output">0</div>
-              <div style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);">Output PDFs</div>
+            <div style="font-size:var(--font-size-lg);color:var(--color-text-tertiary);">&rarr;</div>
+            <div class="batch-summary-item batch-summary-item--output">
+              <span class="batch-summary-item__label">Output Documents</span>
+              <span class="batch-summary-item__val" id="summary-stat-outputs">0</span>
             </div>
           </div>
-        </div>
 
-        <div class="card__footer" style="justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);">
-          <div style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);">
-            Each output: <span id="batch-naming-preview" style="font-family:var(--font-mono);"></span>
+          <div class="batch-summary-formula">
+            <strong>Output structure:</strong>
+            <span id="summary-structure-text">Add repeating and unique files to preview structure</span>
           </div>
-          <button type="button" id="batch-generate-btn" class="btn btn--primary btn--lg" disabled>
-            <i data-lucide="zap"></i>
-            <span>Generate Batch</span>
-          </button>
+
+          <div>
+            <button type="button" id="batch-generate-btn" class="btn btn--primary btn--lg" disabled>
+              <i data-lucide="layers"></i>
+              <span>Generate PDFs</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- ── Progress / Results Container ──────────────────────────── -->
+      <!-- Progress View Container -->
       <div id="batch-progress-container" style="display:none;"></div>
 
     </div>
@@ -150,171 +173,378 @@ export function renderBatch(container) {
 
   container.appendChild(panel);
 
-  // ── DOM refs ──────────────────────────────────────────────────────────
-  const repeatingDropzoneEl = panel.querySelector('#batch-repeating-dropzone');
-  const repeatingListEl = panel.querySelector('#batch-repeating-list');
-  const repeatingCountBadge = panel.querySelector('#batch-repeating-count');
-  const repeatingClearBtn = panel.querySelector('#batch-repeating-clear');
+  // ── DOM References ─────────────────────────────────────────────────────
+  const workspace = panel.querySelector('#batch-workspace');
+  const repeatingSlotsList = panel.querySelector('#repeating-slots-list');
+  const repeatingActiveBadge = panel.querySelector('#batch-repeating-active-badge');
+  const slotCountVal = panel.querySelector('#batch-slot-count-val');
+  const slotDecBtn = panel.querySelector('#batch-slot-dec');
+  const slotIncBtn = panel.querySelector('#batch-slot-inc');
+  const repeatingClearBtn = panel.querySelector('#batch-repeating-clear-btn');
 
-  const uniqueDropzoneEl = panel.querySelector('#batch-unique-dropzone');
-  const uniqueListEl = panel.querySelector('#batch-unique-list');
-  const uniqueCountBadge = panel.querySelector('#batch-unique-count');
-  const uniqueClearBtn = panel.querySelector('#batch-unique-clear');
+  const uniqueCountBadge = panel.querySelector('#batch-unique-count-badge');
+  const uniqueAddBtn = panel.querySelector('#batch-add-unique-btn');
+  const uniqueClearBtn = panel.querySelector('#batch-unique-clear-btn');
+  const uniqueDropzone = panel.querySelector('#unique-dropzone');
+  const uniqueFileManager = panel.querySelector('#unique-file-manager');
+  const uniqueFileList = panel.querySelector('#unique-file-list');
 
-  const summaryCard = panel.querySelector('#batch-summary-card');
-  const summaryRepeating = panel.querySelector('#batch-summary-repeating');
-  const summaryUnique = panel.querySelector('#batch-summary-unique');
-  const summaryOutput = panel.querySelector('#batch-summary-output');
-  const namingPreview = panel.querySelector('#batch-naming-preview');
+  const summaryStatRepeating = panel.querySelector('#summary-stat-repeating');
+  const summaryStatUnique = panel.querySelector('#summary-stat-unique');
+  const summaryStatOutputs = panel.querySelector('#summary-stat-outputs');
+  const summaryStructureText = panel.querySelector('#summary-structure-text');
   const generateBtn = panel.querySelector('#batch-generate-btn');
   const progressContainer = panel.querySelector('#batch-progress-container');
 
-  const workspace = panel.querySelector('#batch-workspace');
+  // ── Summary Updater ────────────────────────────────────────────────────
+  function updateSummary() {
+    const activeRepeating = repeatingSlots.map(s => s.file).filter(Boolean);
+    const repCount = activeRepeating.length;
+    const totalSlots = repeatingSlots.length;
+    const uqCount = uniqueFiles.length;
 
-  // ── UI State Updater ─────────────────────────────────────────────────
-  function updateUiState() {
-    const rCount = repeatingFiles.length;
-    const uCount = uniqueFiles.length;
+    repeatingActiveBadge.textContent = `${repCount} / ${totalSlots} ready`;
+    repeatingClearBtn.style.display = repCount > 0 ? '' : 'none';
 
-    repeatingCountBadge.textContent = `${rCount} ${rCount === 1 ? 'file' : 'files'}`;
-    uniqueCountBadge.textContent = `${uCount} ${uCount === 1 ? 'file' : 'files'}`;
+    uniqueCountBadge.textContent = `${uqCount} ${uqCount === 1 ? 'file' : 'files'}`;
+    uniqueClearBtn.style.display = uqCount > 0 ? '' : 'none';
+    uniqueFileManager.style.display = uqCount > 0 ? '' : 'none';
 
-    repeatingClearBtn.style.display = rCount > 0 ? '' : 'none';
-    uniqueClearBtn.style.display = uCount > 0 ? '' : 'none';
+    summaryStatRepeating.textContent = String(repCount);
+    summaryStatUnique.textContent = String(uqCount);
+    summaryStatOutputs.textContent = String(uqCount);
 
-    // Show summary card when both sections have files
-    if (rCount > 0 && uCount > 0) {
-      summaryCard.style.display = 'block';
-      summaryRepeating.textContent = String(rCount);
-      summaryUnique.textContent = String(uCount);
-      summaryOutput.textContent = String(uCount);
-
-      // Preview naming convention
-      if (uniqueFiles.length > 0) {
-        const sampleName = uniqueFiles[0].name.replace(/\.pdf$/i, '') + '_merged.pdf';
-        namingPreview.textContent = sampleName;
-      }
-
+    if (repCount > 0 && uqCount > 0) {
+      const parts = activeRepeating.map((f, i) => `Repeating ${i + 1} (${escapeHtml(f.name)})`);
+      parts.push(`One unique PDF`);
+      summaryStructureText.innerHTML = parts.join(' <code>+</code> ');
       generateBtn.disabled = isProcessing;
-      generateBtn.title = `Generate ${uCount} output PDFs`;
+    } else if (repCount === 0 && uqCount > 0) {
+      summaryStructureText.textContent = `Select at least 1 repeating PDF to prepend to all ${uqCount} unique files.`;
+      generateBtn.disabled = true;
+    } else if (repCount > 0 && uqCount === 0) {
+      summaryStructureText.textContent = `Add unique PDF files (one output will be generated per unique file).`;
+      generateBtn.disabled = true;
     } else {
-      summaryCard.style.display = 'none';
+      summaryStructureText.textContent = `Add repeating and unique files to preview structure.`;
       generateBtn.disabled = true;
     }
   }
 
-  // ── Repeating Files ──────────────────────────────────────────────────
-  function addRepeatingFiles(newFiles) {
-    const valid = newFiles.filter(isPdf);
-    if (valid.length === 0) return;
+  // ── Render Repeating Slots ─────────────────────────────────────────────
+  function renderRepeatingSlots() {
+    repeatingSlotsList.innerHTML = '';
+    slotCountVal.textContent = String(repeatingSlots.length);
+    slotDecBtn.disabled = repeatingSlots.length <= 1;
+    slotIncBtn.disabled = repeatingSlots.length >= 10;
 
-    repeatingFiles.push(...valid);
+    repeatingSlots.forEach((slot, index) => {
+      const slotEl = document.createElement('div');
+      slotEl.className = 'repeating-slot';
+      slotEl.dataset.slotIndex = String(index);
 
-    if (!repeatingListComponent) {
-      repeatingListComponent = createFileList({
-        container: repeatingListEl,
-        files: repeatingFiles.map(f => ({ file: f })),
-        onReorder: (newItems) => {
-          repeatingFiles = newItems.map(item => item.file || item);
-          updateUiState();
-        },
-        onRemove: (removedIndex) => {
-          repeatingFiles.splice(removedIndex, 1);
-          updateUiState();
-        },
+      const formattedIndex = String(index + 1).padStart(2, '0');
+
+      if (slot.file) {
+        slotEl.innerHTML = `
+          <div class="repeating-slot__index">${formattedIndex}</div>
+          <i data-lucide="file-text" class="repeating-slot__icon"></i>
+          <div class="repeating-slot__main">
+            <span class="repeating-slot__name" title="${escapeHtml(slot.file.name)}">${escapeHtml(slot.file.name)}</span>
+            <span class="repeating-slot__size">${formatFileSize(slot.file.size)}</span>
+          </div>
+          <div class="repeating-slot__actions">
+            <button type="button" class="btn btn--ghost btn--sm slot-btn-replace" title="Replace file in this slot">
+              <i data-lucide="refresh-cw"></i>
+              <span style="font-size:var(--font-size-xs);margin-left:2px;">Replace</span>
+            </button>
+            <button type="button" class="btn btn--ghost btn--icon btn--sm slot-btn-up" title="Move up" ${index === 0 ? 'disabled' : ''}>
+              <i data-lucide="chevron-up"></i>
+            </button>
+            <button type="button" class="btn btn--ghost btn--icon btn--sm slot-btn-down" title="Move down" ${index === repeatingSlots.length - 1 ? 'disabled' : ''}>
+              <i data-lucide="chevron-down"></i>
+            </button>
+            <button type="button" class="btn btn--ghost btn--icon btn--sm btn--danger slot-btn-clear" title="Clear file from slot">
+              <i data-lucide="trash-2"></i>
+            </button>
+          </div>
+        `;
+      } else {
+        slotEl.innerHTML = `
+          <div class="repeating-slot__index">${formattedIndex}</div>
+          <i data-lucide="file-dashed" class="repeating-slot__icon" style="color:var(--color-text-tertiary);"></i>
+          <div class="repeating-slot__main">
+            <button type="button" class="repeating-slot__empty slot-btn-choose" title="Select PDF file for slot ${formattedIndex}">
+              <i data-lucide="plus" style="width:13px;height:13px;"></i>
+              <span>Choose PDF for Slot ${formattedIndex} (e.g. Cover, Terms, Header)</span>
+            </button>
+          </div>
+          <div class="repeating-slot__actions">
+            <button type="button" class="btn btn--ghost btn--icon btn--sm slot-btn-up" title="Move up" ${index === 0 ? 'disabled' : ''}>
+              <i data-lucide="chevron-up"></i>
+            </button>
+            <button type="button" class="btn btn--ghost btn--icon btn--sm slot-btn-down" title="Move down" ${index === repeatingSlots.length - 1 ? 'disabled' : ''}>
+              <i data-lucide="chevron-down"></i>
+            </button>
+            ${repeatingSlots.length > 1 ? `
+              <button type="button" class="btn btn--ghost btn--icon btn--sm btn--danger slot-btn-remove-slot" title="Remove slot">
+                <i data-lucide="x"></i>
+              </button>
+            ` : ''}
+          </div>
+        `;
+      }
+
+      // Drag & drop directly onto slot
+      slotEl.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        slotEl.style.backgroundColor = 'var(--color-brand-subtle)';
       });
-    } else {
-      repeatingListComponent.update(repeatingFiles.map(f => ({ file: f })));
-    }
+      slotEl.addEventListener('dragleave', () => {
+        slotEl.style.backgroundColor = '';
+      });
+      slotEl.addEventListener('drop', (e) => {
+        e.preventDefault();
+        slotEl.style.backgroundColor = '';
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          const dropped = Array.from(e.dataTransfer.files).find(isPdf);
+          if (dropped) {
+            slot.file = dropped;
+            renderRepeatingSlots();
+            updateSummary();
+          }
+        }
+      });
 
-    updateUiState();
-    if (window.lucide) window.lucide.createIcons({ node: panel });
+      // Actions wiring
+      const replaceBtn = slotEl.querySelector('.slot-btn-replace');
+      const chooseBtn = slotEl.querySelector('.slot-btn-choose');
+      const upBtn = slotEl.querySelector('.slot-btn-up');
+      const downBtn = slotEl.querySelector('.slot-btn-down');
+      const clearBtn = slotEl.querySelector('.slot-btn-clear');
+      const removeSlotBtn = slotEl.querySelector('.slot-btn-remove-slot');
+
+      const triggerFileSelect = () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.pdf,application/pdf';
+        input.style.display = 'none';
+        input.addEventListener('change', () => {
+          if (input.files && input.files[0] && isPdf(input.files[0])) {
+            slot.file = input.files[0];
+            renderRepeatingSlots();
+            updateSummary();
+          }
+          input.remove();
+        });
+        document.body.appendChild(input);
+        input.click();
+      };
+
+      if (replaceBtn) replaceBtn.addEventListener('click', triggerFileSelect);
+      if (chooseBtn) chooseBtn.addEventListener('click', triggerFileSelect);
+
+      if (upBtn) {
+        upBtn.addEventListener('click', () => {
+          if (index > 0) {
+            const temp = repeatingSlots[index];
+            repeatingSlots[index] = repeatingSlots[index - 1];
+            repeatingSlots[index - 1] = temp;
+            renderRepeatingSlots();
+            updateSummary();
+          }
+        });
+      }
+
+      if (downBtn) {
+        downBtn.addEventListener('click', () => {
+          if (index < repeatingSlots.length - 1) {
+            const temp = repeatingSlots[index];
+            repeatingSlots[index] = repeatingSlots[index + 1];
+            repeatingSlots[index + 1] = temp;
+            renderRepeatingSlots();
+            updateSummary();
+          }
+        });
+      }
+
+      if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+          slot.file = null;
+          renderRepeatingSlots();
+          updateSummary();
+        });
+      }
+
+      if (removeSlotBtn) {
+        removeSlotBtn.addEventListener('click', () => {
+          if (repeatingSlots.length > 1) {
+            repeatingSlots.splice(index, 1);
+            renderRepeatingSlots();
+            updateSummary();
+          }
+        });
+      }
+
+      repeatingSlotsList.appendChild(slotEl);
+    });
+
+    if (window.lucide) window.lucide.createIcons({ node: repeatingSlotsList });
   }
 
-  createDropzone({
-    container: repeatingDropzoneEl,
-    accept: '.pdf,application/pdf',
-    multiple: true,
-    compact: true,
-    title: 'Add repeating PDF files',
-    subtitle: 'Pages shared across all outputs',
-    icon: 'plus',
-    onFiles: addRepeatingFiles,
+  // Slot Counter Buttons
+  slotDecBtn.addEventListener('click', () => {
+    if (repeatingSlots.length > 1) {
+      repeatingSlots.pop();
+      renderRepeatingSlots();
+      updateSummary();
+    }
+  });
+
+  slotIncBtn.addEventListener('click', () => {
+    if (repeatingSlots.length < 10) {
+      repeatingSlots.push({ id: slotCounter++, file: null });
+      renderRepeatingSlots();
+      updateSummary();
+    }
   });
 
   repeatingClearBtn.addEventListener('click', async () => {
-    if (repeatingFiles.length > 0) {
-      const ok = await confirmDialog('Clear Repeating Files', 'Remove all repeating PDF files?');
-      if (ok) {
-        repeatingFiles = [];
-        if (repeatingListComponent) repeatingListComponent.update([]);
-        updateUiState();
-      }
+    const ok = await confirmDialog('Clear Repeating Files', 'Clear all files from repeating slots?');
+    if (ok) {
+      repeatingSlots.forEach(s => s.file = null);
+      renderRepeatingSlots();
+      updateSummary();
     }
   });
 
-  // ── Unique Files ─────────────────────────────────────────────────────
-  function addUniqueFiles(newFiles) {
-    const valid = newFiles.filter(isPdf);
-    if (valid.length === 0) return;
+  // ── Render Unique Files ────────────────────────────────────────────────
+  function renderUniqueFiles() {
+    uniqueFileList.innerHTML = '';
 
-    uniqueFiles.push(...valid);
+    uniqueFiles.forEach((file, index) => {
+      const row = document.createElement('div');
+      row.className = 'file-row';
+      row.dataset.uniqueIndex = String(index);
 
-    if (!uniqueListComponent) {
-      uniqueListComponent = createFileList({
-        container: uniqueListEl,
-        files: uniqueFiles.map(f => ({ file: f })),
-        onReorder: (newItems) => {
-          uniqueFiles = newItems.map(item => item.file || item);
-          updateUiState();
-        },
-        onRemove: (removedIndex) => {
-          uniqueFiles.splice(removedIndex, 1);
-          updateUiState();
-        },
+      const formattedIndex = String(index + 1).padStart(3, '0');
+
+      row.innerHTML = `
+        <div class="file-row__leading">
+          <div class="file-row__index">${formattedIndex}</div>
+          <div class="file-row__icon"><i data-lucide="file-text"></i></div>
+        </div>
+        <div class="file-row__info">
+          <div class="file-row__name" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</div>
+        </div>
+        <div class="file-row__meta">
+          <span class="file-row__size">${formatFileSize(file.size)}</span>
+        </div>
+        <div class="file-row__actions">
+          <button type="button" class="btn btn--ghost btn--sm uq-btn-replace" title="Replace this document preserving slot ${formattedIndex}">
+            <i data-lucide="refresh-cw"></i>
+            <span class="btn-text">Replace</span>
+          </button>
+          <button type="button" class="btn btn--ghost btn--icon btn--sm btn--danger uq-btn-remove" title="Remove file">
+            <i data-lucide="trash-2"></i>
+          </button>
+        </div>
+      `;
+
+      // Replace preserving position
+      row.querySelector('.uq-btn-replace').addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.pdf,application/pdf';
+        input.style.display = 'none';
+        input.addEventListener('change', () => {
+          if (input.files && input.files[0] && isPdf(input.files[0])) {
+            uniqueFiles[index] = input.files[0];
+            renderUniqueFiles();
+            updateSummary();
+          }
+          input.remove();
+        });
+        document.body.appendChild(input);
+        input.click();
       });
-    } else {
-      uniqueListComponent.update(uniqueFiles.map(f => ({ file: f })));
-    }
 
-    updateUiState();
-    if (window.lucide) window.lucide.createIcons({ node: panel });
+      // Remove
+      row.querySelector('.uq-btn-remove').addEventListener('click', () => {
+        uniqueFiles.splice(index, 1);
+        renderUniqueFiles();
+        updateSummary();
+      });
+
+      uniqueFileList.appendChild(row);
+    });
+
+    if (window.lucide) window.lucide.createIcons({ node: uniqueFileList });
   }
 
-  createDropzone({
-    container: uniqueDropzoneEl,
-    accept: '.pdf,application/pdf',
-    multiple: true,
-    compact: true,
-    title: 'Add unique PDF files',
-    subtitle: 'One output per file',
-    icon: 'plus',
-    onFiles: addUniqueFiles,
+  function addUniquePdfs(files) {
+    const valid = Array.from(files).filter(isPdf);
+    if (valid.length > 0) {
+      uniqueFiles.push(...valid);
+      renderUniqueFiles();
+      updateSummary();
+    }
+  }
+
+  // Unique Dropzone & Add Button
+  uniqueDropzone.addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.pdf,application/pdf';
+    input.multiple = true;
+    input.style.display = 'none';
+    input.addEventListener('change', () => {
+      if (input.files) addUniquePdfs(input.files);
+      input.remove();
+    });
+    document.body.appendChild(input);
+    input.click();
+  });
+
+  uniqueAddBtn.addEventListener('click', () => uniqueDropzone.click());
+
+  uniqueDropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uniqueDropzone.classList.add('dropzone--hover');
+  });
+
+  uniqueDropzone.addEventListener('dragleave', () => {
+    uniqueDropzone.classList.remove('dropzone--hover');
+  });
+
+  uniqueDropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uniqueDropzone.classList.remove('dropzone--hover');
+    if (e.dataTransfer.files) {
+      addUniquePdfs(e.dataTransfer.files);
+    }
   });
 
   uniqueClearBtn.addEventListener('click', async () => {
-    if (uniqueFiles.length > 0) {
-      const ok = await confirmDialog('Clear Unique Files', 'Remove all unique PDF files?');
-      if (ok) {
-        uniqueFiles = [];
-        if (uniqueListComponent) uniqueListComponent.update([]);
-        updateUiState();
-      }
+    const ok = await confirmDialog('Clear Unique Files', 'Remove all unique files from the list?');
+    if (ok) {
+      uniqueFiles = [];
+      renderUniqueFiles();
+      updateSummary();
     }
   });
 
-  // ── Generate Batch ───────────────────────────────────────────────────
+  // ── Generation Logic ──────────────────────────────────────────────────
   generateBtn.addEventListener('click', async () => {
-    if (repeatingFiles.length === 0 || uniqueFiles.length === 0 || isProcessing) return;
+    const activeRepeating = repeatingSlots.map(s => s.file).filter(Boolean);
+    if (activeRepeating.length === 0 || uniqueFiles.length === 0 || isProcessing) return;
 
     isProcessing = true;
-    updateUiState();
+    updateSummary();
 
-    // Hide workspace cards, show progress
+    // Hide workspace sections, show progress
     for (const child of workspace.children) {
-      if (child !== progressContainer) {
-        child.style.display = 'none';
-      }
+      if (child !== progressContainer) child.style.display = 'none';
     }
     progressContainer.style.display = 'block';
     progressContainer.innerHTML = '';
@@ -323,7 +553,7 @@ export function renderBatch(container) {
 
     const progressView = createProgressView({
       container: progressContainer,
-      title: `Generating ${totalOutputs} PDF Documents…`,
+      title: `Generating ${totalOutputs} Batch PDF Documents…`,
       total: totalOutputs,
     });
 
@@ -332,29 +562,29 @@ export function renderBatch(container) {
         percent: 5,
         current: 0,
         total: totalOutputs,
-        message: 'Uploading files to local engine…',
+        message: 'Uploading document inputs to local engine…',
         status: 'Uploading',
       });
 
-      const { job_id } = await api.startBatch(repeatingFiles, uniqueFiles);
+      const { job_id } = await api.startBatch(activeRepeating, uniqueFiles);
 
       const finalStatus = await api.pollJob(job_id, (job) => {
         progressView.update({
           current: job.current || 0,
           total: job.total || totalOutputs,
-          message: job.message || 'Processing…',
+          message: job.message || 'Processing batch…',
           currentFile: job.current_file || '',
           status: `${job.completed || 0} completed` + (job.failed > 0 ? `, ${job.failed} failed` : ''),
         });
       });
 
-      // Batch completed!
+      // Fetch output metadata
       const filesRes = await api.listOutputs(job_id).catch(() => ({ files: [] }));
       const fileCount = filesRes.files ? filesRes.files.length : 0;
       const totalSize = filesRes.files ? filesRes.files.reduce((s, f) => s + (f.size || 0), 0) : 0;
-
-      const failedCount = finalStatus.failed || 0;
       const completedCount = finalStatus.completed || fileCount;
+
+      recordRecentJob('Custom Batch Builder', `${completedCount} PDFs (ZIP Bundle)`, `/api/output/${job_id}/zip`);
 
       const successActions = [
         {
@@ -365,9 +595,7 @@ export function renderBatch(container) {
         },
       ];
 
-      // Add individual file download option if there are files
       if (fileCount > 0 && fileCount <= 20) {
-        // Show individual downloads only for small batches
         successActions.push({
           label: 'View Individual Files',
           icon: 'list',
@@ -385,21 +613,19 @@ export function renderBatch(container) {
 
       let successMsg = `Successfully generated ${completedCount} PDF documents`;
       if (totalSize > 0) successMsg += ` (${formatFileSize(totalSize)} total)`;
-      if (failedCount > 0) successMsg += `. ${failedCount} file(s) failed.`;
-      else successMsg += '.';
+      successMsg += '.';
 
       progressView.showSuccess({
-        title: 'Batch Complete!',
+        title: 'Batch Complete',
         message: successMsg,
         actions: successActions,
       });
 
     } catch (err) {
       progressView.showError({
-        title: 'Batch Failed',
-        message: err.message || 'An unexpected error occurred while generating the batch.',
+        title: 'Batch Generation Failed',
+        message: err.message || 'An unexpected error occurred during batch generation.',
         onRetry: () => {
-          // Reset processing state and re-trigger
           isProcessing = false;
           generateBtn.click();
         },
@@ -408,26 +634,23 @@ export function renderBatch(container) {
     }
   });
 
-  // ── Individual File Download View ────────────────────────────────────
+  // Individual file list view
   function showIndividualFiles(jobId, files) {
     progressContainer.innerHTML = '';
+    const section = document.createElement('div');
+    section.className = 'workspace-section';
 
-    const card = document.createElement('div');
-    card.className = 'card';
-
-    let filesHtml = '';
+    let listHtml = '';
     files.forEach(f => {
-      filesHtml += `
-        <div class="file-row" style="cursor:pointer;" data-filename="${escapeHtml(f.name)}">
-          <div class="file-row__icon" aria-hidden="true">
-            <i data-lucide="file-text"></i>
-          </div>
+      listHtml += `
+        <div class="file-row">
+          <div class="file-row__icon"><i data-lucide="file-check"></i></div>
           <div class="file-row__info">
             <div class="file-row__name">${escapeHtml(f.name)}</div>
             <div class="file-row__meta">${formatFileSize(f.size)}</div>
           </div>
           <div class="file-row__actions">
-            <button type="button" class="btn btn--ghost btn--sm btn-download-individual" data-filename="${escapeHtml(f.name)}" title="Download">
+            <button type="button" class="btn btn--secondary btn--sm btn-dl-file" data-filename="${escapeHtml(f.name)}">
               <i data-lucide="download"></i>
               <span>Download</span>
             </button>
@@ -436,11 +659,11 @@ export function renderBatch(container) {
       `;
     });
 
-    card.innerHTML = `
-      <div class="card__header" style="justify-content:space-between;">
-        <div class="card__title">Generated Files (${files.length})</div>
+    section.innerHTML = `
+      <div class="workspace-section__header">
+        <span class="workspace-section__title">Generated Documents (${files.length})</span>
         <div style="display:flex;gap:var(--space-3);">
-          <button type="button" class="btn btn--primary btn--sm" id="batch-download-zip-btn">
+          <button type="button" class="btn btn--primary btn--sm" id="batch-dl-all-zip">
             <i data-lucide="archive"></i>
             <span>Download All as ZIP</span>
           </button>
@@ -450,56 +673,43 @@ export function renderBatch(container) {
           </button>
         </div>
       </div>
-      <div class="card__body" style="padding:0;max-height:500px;overflow-y:auto;">
-        <div class="file-list">
-          ${filesHtml}
-        </div>
+      <div class="file-list" style="max-height:480px;overflow-y:auto;">
+        ${listHtml}
       </div>
     `;
 
-    progressContainer.appendChild(card);
+    progressContainer.appendChild(section);
 
-    // Wire download buttons
-    card.querySelectorAll('.btn-download-individual').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        api.downloadFile(jobId, btn.dataset.filename);
-      });
+    section.querySelectorAll('.btn-dl-file').forEach(btn => {
+      btn.addEventListener('click', () => api.downloadFile(jobId, btn.dataset.filename));
     });
 
-    card.querySelector('#batch-download-zip-btn').addEventListener('click', () => {
-      api.downloadZip(jobId);
-    });
+    section.querySelector('#batch-dl-all-zip').addEventListener('click', () => api.downloadZip(jobId));
+    section.querySelector('#batch-back-btn').addEventListener('click', () => resetWorkspace());
 
-    card.querySelector('#batch-back-btn').addEventListener('click', () => {
-      resetWorkspace();
-    });
-
-    if (window.lucide) window.lucide.createIcons({ node: card });
+    if (window.lucide) window.lucide.createIcons({ node: section });
   }
 
-  // ── Reset Workspace ──────────────────────────────────────────────────
   function resetWorkspace() {
     isProcessing = false;
-    repeatingFiles = [];
+    repeatingSlots.forEach(s => s.file = null);
     uniqueFiles = [];
-    if (repeatingListComponent) repeatingListComponent.update([]);
-    if (uniqueListComponent) uniqueListComponent.update([]);
+    renderRepeatingSlots();
+    renderUniqueFiles();
+    updateSummary();
 
     progressContainer.style.display = 'none';
     progressContainer.innerHTML = '';
 
     for (const child of workspace.children) {
-      if (child !== progressContainer) {
-        child.style.display = '';
-      }
+      if (child !== progressContainer) child.style.display = '';
     }
-
-    updateUiState();
   }
 
-  // ── Initial icon render ──────────────────────────────────────────────
-  if (window.lucide) {
-    window.lucide.createIcons({ node: panel });
-  }
+  // Initial render
+  renderRepeatingSlots();
+  renderUniqueFiles();
+  updateSummary();
+
+  if (window.lucide) window.lucide.createIcons({ node: panel });
 }
