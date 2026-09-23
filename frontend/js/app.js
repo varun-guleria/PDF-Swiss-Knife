@@ -110,23 +110,20 @@ function getSavedTheme() {
  * Show the Landing Page view.
  */
 export function showLandingView() {
-  const landing = document.getElementById('landing-page');
-  const app = document.getElementById('app');
-  if (landing) landing.style.display = 'block';
-  if (app) app.style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
   document.title = 'PDF Swiss-Knife — Local PDF Workspace';
-  window.scrollTo({ top: 0 });
 }
 
 /**
  * Show the Desktop App Workspace view.
  * @param {string} [toolId='home']
+ * @param {boolean} [animate=true]
  */
-export function showAppView(toolId = 'home') {
-  const landing = document.getElementById('landing-page');
+export function showAppView(toolId = 'home', animate = true) {
   const app = document.getElementById('app');
-  if (landing) landing.style.display = 'none';
-  if (app) app.style.display = 'flex';
+  if (app) {
+    app.scrollIntoView({ behavior: animate ? 'smooth' : 'auto' });
+  }
   navigate(toolId);
 }
 
@@ -137,14 +134,14 @@ function handleRoute() {
   const hash = window.location.hash || '';
   if (hash.startsWith('#/app/')) {
     const toolId = hash.replace('#/app/', '').trim();
-    showAppView(toolId || 'home');
+    showAppView(toolId || 'home', false);
   } else if (hash === '#/app') {
-    showAppView('home');
+    showAppView('home', false);
   } else if (hash.startsWith('#') && hash.length > 2 && NAV_ITEMS.some(n => `#${n.id}` === hash)) {
     const toolId = hash.substring(1);
-    showAppView(toolId);
+    showAppView(toolId, false);
   } else {
-    showLandingView();
+    // No specific deep link, remain at current scroll pos or top
   }
 }
 

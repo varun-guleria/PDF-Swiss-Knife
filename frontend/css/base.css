@@ -27,7 +27,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
-  overflow: hidden; /* App shell — no body scroll */
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* ─── Typography ─────────────────────────────────────────────────────────── */

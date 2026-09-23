@@ -43,7 +43,6 @@
     <a id="landing-brand-link" class="landing-nav__brand" href="#/">
       <img src="/assets/logo.png" alt="PDF Swiss-Knife Logo" class="landing-nav__logo" />
       <span>PDF Swiss-Knife</span>
-      <span class="landing-nav__badge">Local &amp; Offline</span>
     </a>
 
     <div class="landing-nav__actions">
@@ -69,11 +68,19 @@
     </div>
   </nav>
 
-  <!-- ── Pinned/Sticky Hero Track with Video Scrubbing ────────────────────── -->
+  <!-- ── Hero Section ────────────────────────────────────────────────────── -->
   <section id="hero-track" class="hero-track" aria-label="Hero Showcase">
     <div class="hero-stage">
-      
-      <!-- Video Centerpiece (Controlled by scroll progress) -->
+
+      <!-- #1 Animated Gradient Mesh Background -->
+      <div class="hero-gradient-mesh" aria-hidden="true">
+        <div class="hero-gradient-mesh__blob"></div>
+      </div>
+
+      <!-- #3 Grain Texture Overlay -->
+      <div class="hero-grain" aria-hidden="true"></div>
+
+      <!-- Video Centerpiece (plays once, no loop) -->
       <div class="hero-video-wrapper">
         <video
           id="hero-video"
@@ -87,6 +94,9 @@
         ></video>
       </div>
 
+      <!-- #13 Mouse-reactive Spotlight -->
+      <div id="hero-spotlight" class="hero-spotlight" aria-hidden="true"></div>
+
       <!-- Hero Typography Layer -->
       <div class="hero-content">
         <div class="hero-readability-scrim">
@@ -94,12 +104,24 @@
             <i data-lucide="file-text" style="width: 14px; height: 14px;"></i>
             PDF Swiss-Knife
           </span>
+          <!-- #5 Staggered line reveal + #6 Gradient headline -->
           <h1 class="hero-headline">
-            One workspace.<br />Every PDF task.
+            <span class="hero-line hero-line--1">One workspace.</span>
+            <span class="hero-line hero-line--2">Every PDF task.</span>
           </h1>
+          <!-- #7 Keyword carousel in subhead -->
           <p class="hero-subhead">
-            A local, all-in-one PDF workspace for merging, editing, organizing, converting and creating documents.
+            A local, all-in-one PDF workspace for
+            <span class="hero-keyword-carousel" aria-live="polite">
+              <span class="hero-keyword hero-keyword--active">merging</span>
+              <span class="hero-keyword">splitting</span>
+              <span class="hero-keyword">organizing</span>
+              <span class="hero-keyword">converting</span>
+              <span class="hero-keyword">creating</span>
+            </span>
+            your documents.
           </p>
+          <!-- #4 CTA with accent glow -->
           <div class="hero-actions">
             <button id="hero-open-app-btn" class="hero-btn-primary" type="button">
               <span>Open PDF Swiss-Knife</span>
@@ -109,13 +131,32 @@
         </div>
       </div>
 
-      <!-- Subtle scroll exploration hint -->
+      <!-- Scroll exploration hint -->
       <div id="hero-scroll-hint" class="hero-scroll-hint" aria-hidden="true">
         <span>Scroll to explore</span>
         <i data-lucide="chevron-down"></i>
       </div>
 
     </div><!-- /.hero-stage -->
+
+    <!-- Stats Strip -->
+    <div class="hero-stats-strip" aria-label="Key stats">
+      <div class="hero-stat">
+        <span class="hero-stat__number" data-count="12">0</span>
+        <span class="hero-stat__label">Tools</span>
+      </div>
+      <div class="hero-stat-divider"></div>
+      <div class="hero-stat">
+        <span class="hero-stat__number">100%</span>
+        <span class="hero-stat__label">Local</span>
+      </div>
+      <div class="hero-stat-divider"></div>
+      <div class="hero-stat">
+        <span class="hero-stat__number">Zero</span>
+        <span class="hero-stat__label">Data Sent</span>
+      </div>
+    </div>
+
   </section><!-- /#hero-track -->
 
   <!-- ── Transition Section: Architecture & Capabilities ─────────────────── -->
@@ -123,7 +164,7 @@
     
     <!-- Privacy & Local Design -->
     <section id="privacy-section" class="landing-section">
-      <div class="landing-section__header">
+      <div class="landing-section__header" data-reveal>
         <span class="landing-section__eyebrow">Privacy By Architecture</span>
         <h2 class="landing-section__title">Your Documents Never Leave Your Computer</h2>
         <p class="landing-section__desc">
@@ -132,7 +173,7 @@
       </div>
 
       <div class="privacy-grid">
-        <div class="privacy-card">
+        <div class="privacy-card" data-reveal style="transition-delay: 0.05s">
           <div class="privacy-card__icon">
             <i data-lucide="shield-check"></i>
           </div>
@@ -142,7 +183,7 @@
           </p>
         </div>
 
-        <div class="privacy-card">
+        <div class="privacy-card" data-reveal style="transition-delay: 0.15s">
           <div class="privacy-card__icon">
             <i data-lucide="wifi-off"></i>
           </div>
@@ -152,7 +193,7 @@
           </p>
         </div>
 
-        <div class="privacy-card">
+        <div class="privacy-card" data-reveal style="transition-delay: 0.25s">
           <div class="privacy-card__icon">
             <i data-lucide="infinity"></i>
           </div>
@@ -164,7 +205,7 @@
       </div>
 
       <!-- Workflows Grid -->
-      <div id="workflows-section" class="landing-section__header" style="margin-top: 40px;">
+      <div id="workflows-section" class="landing-section__header" data-reveal style="margin-top: 60px;">
         <span class="landing-section__eyebrow">Workflows &amp; Tools</span>
         <h2 class="landing-section__title">Comprehensive Document Tooling</h2>
         <p class="landing-section__desc">
@@ -173,7 +214,7 @@
       </div>
 
       <div class="workflows-grid">
-        <div class="workflow-item">
+        <div class="workflow-item" data-bento="lg" data-reveal style="transition-delay: 0.05s">
           <div>
             <div class="workflow-item__header">
               <div class="workflow-item__icon"><i data-lucide="layers"></i></div>
@@ -186,7 +227,7 @@
           </button>
         </div>
 
-        <div class="workflow-item">
+        <div class="workflow-item" data-reveal style="transition-delay: 0.1s">
           <div>
             <div class="workflow-item__header">
               <div class="workflow-item__icon"><i data-lucide="scissors"></i></div>
@@ -199,7 +240,7 @@
           </button>
         </div>
 
-        <div class="workflow-item">
+        <div class="workflow-item" data-reveal style="transition-delay: 0.15s">
           <div>
             <div class="workflow-item__header">
               <div class="workflow-item__icon"><i data-lucide="layout-grid"></i></div>
@@ -212,7 +253,7 @@
           </button>
         </div>
 
-        <div class="workflow-item">
+        <div class="workflow-item" data-reveal style="transition-delay: 0.2s">
           <div>
             <div class="workflow-item__header">
               <div class="workflow-item__icon"><i data-lucide="image"></i></div>
@@ -225,7 +266,7 @@
           </button>
         </div>
 
-        <div class="workflow-item">
+        <div class="workflow-item" data-reveal style="transition-delay: 0.25s">
           <div>
             <div class="workflow-item__header">
               <div class="workflow-item__icon"><i data-lucide="archive"></i></div>
@@ -238,7 +279,7 @@
           </button>
         </div>
 
-        <div class="workflow-item">
+        <div class="workflow-item" data-reveal style="transition-delay: 0.3s">
           <div>
             <div class="workflow-item__header">
               <div class="workflow-item__icon"><i data-lucide="lock"></i></div>
@@ -251,26 +292,27 @@
           </button>
         </div>
 
-        <div class="workflow-item" style="grid-column: 1 / -1;">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-4);">
+        <div class="workflow-item" data-bento="full" data-reveal style="transition-delay: 0.35s">
+          <div>
             <div>
               <div class="workflow-item__header">
                 <div class="workflow-item__icon"><i data-lucide="layers"></i></div>
                 <h3 class="workflow-item__title">Custom Batch PDF Builder</h3>
               </div>
-              <p class="workflow-item__desc" style="max-width: 680px; margin-bottom: 0;">
+              <p class="workflow-item__desc">
                 Assemble repeating document sets (covers, terms, instructions) with batches of unique records dynamically.
               </p>
             </div>
-            <button class="workflow-item__action workflow-launch-btn btn btn--primary" data-tool="batch" type="button" style="text-decoration: none; padding: 8px 16px;">
-              Open Custom Batch Builder &rarr;
+            <button class="hero-btn-primary workflow-launch-btn" data-tool="batch" type="button">
+              <span>Open Batch Builder</span>
+              <i data-lucide="arrow-right"></i>
             </button>
           </div>
         </div>
       </div>
 
       <!-- Bottom CTA Banner -->
-      <div class="landing-cta-banner">
+      <div class="landing-cta-banner" data-reveal>
         <h3 class="landing-cta-banner__title">Ready to work with your PDF documents?</h3>
         <p class="landing-cta-banner__sub">
           Launch the local workspace now. Your files remain on your disk at all times.
@@ -300,7 +342,7 @@
 <!-- ═══════════════════════════════════════════════════════════════════════════
      APP WORKSPACE (The desktop productivity workspace)
      ═══════════════════════════════════════════════════════════════════════════ -->
-<div id="app" role="application" aria-label="PDF Swiss-Knife" style="display: none;">
+<div id="app" role="application" aria-label="PDF Swiss-Knife">
 
   <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
   <aside id="sidebar" class="sidebar" aria-label="Navigation">

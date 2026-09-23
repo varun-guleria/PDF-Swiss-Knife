@@ -23,6 +23,7 @@
   --color-bg-app:        #f8f9fa;      /* Main application canvas */
   --color-bg-sidebar:    #f0f2f5;      /* Navigation sidebar (slightly inset) */
   --color-bg-surface:    #ffffff;      /* Workspace panels, file tables, documents */
+  --color-bg-surface-glass: rgba(255, 255, 255, 0.75);
   --color-bg-elevated:   #ffffff;      /* Dialogs, popovers */
   --color-bg-sunken:     #f3f4f6;      /* Input fields, table header bars */
   --color-bg-hover:      #eaedf1;      /* Row / button hover */
@@ -83,6 +84,7 @@
   --color-bg-app:        #1b1c1e;      /* Neutral dark desktop canvas */
   --color-bg-sidebar:    #161718;      /* Deeper navigation column */
   --color-bg-surface:    #222326;      /* Document workspaces, file lists */
+  --color-bg-surface-glass: rgba(34, 35, 38, 0.75);
   --color-bg-elevated:   #2a2b2f;      /* Dialogs, menus */
   --color-bg-sunken:     #17181a;      /* Inputs, table headers */
   --color-bg-hover:      #2b2c31;      /* Hover state */

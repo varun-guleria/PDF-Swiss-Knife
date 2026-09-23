@@ -1,155 +1,213 @@
 /**
- * landing.js — PDF Swiss-Knife Landing Page & Hero Scroll Animation Controller.
+ * landing.js — PDF Swiss-Knife Landing Page Controller.
  *
- * Responsibilities:
- * - Direct scroll-driven video scrubbing via requestAnimationFrame
- * - Pinned sticky hero coordinate tracking
- * - Smooth bi-directional (forward and reverse) playback scrubbing
- * - prefers-reduced-motion fallback
- * - Action bindings for [ Open PDF Swiss-Knife ] and workflow shortcuts
+ * Premium cinematic hero with:
+ * - One-shot video playback (no loop)
+ * - Keyword carousel (cycles once, then stops)
+ * - Parallax scroll layers
+ * - Scroll-triggered reveal animations
+ * - Mouse-reactive spotlight
+ * - Scroll hint auto-hide
+ * - Stats counter animation
  */
 
 'use strict';
 
 /**
- * Initialise the landing page hero animation and interactions.
+ * Initialise the landing page hero and interactions.
  * @param {Object} options
  * @param {Function} options.onOpenApp - Callback when user clicks Open App (optional toolId param)
  */
 export function initLandingPage({ onOpenApp }) {
-  const heroTrack = document.getElementById('hero-track');
+
+  // ─── Video: play once, no loop ──────────────────────────────────────────
   const heroVideo = document.getElementById('hero-video');
-  const scrollHint = document.getElementById('hero-scroll-hint');
 
-  if (!heroTrack || !heroVideo) {
-    console.warn('[Landing] Hero elements not found');
-    return;
-  }
+  if (heroVideo) {
+    heroVideo.muted = true;
+    heroVideo.playsInline = true;
+    heroVideo.loop = false;   // Play once, stop on final frame
+    heroVideo.autoplay = true;
 
-  // ─── Video configuration ──────────────────────────────────────────────────
-  heroVideo.pause();
-  heroVideo.muted = true;
-  heroVideo.playsInline = true;
-  heroVideo.autoplay = false;
-  heroVideo.loop = false;
-
-  let videoDuration = 10.01; // Default fallback from video metadata
-  if (heroVideo.duration && !isNaN(heroVideo.duration) && heroVideo.duration > 0) {
-    videoDuration = heroVideo.duration;
-  }
-
-  heroVideo.addEventListener('loadedmetadata', () => {
-    if (heroVideo.duration && !isNaN(heroVideo.duration)) {
-      videoDuration = heroVideo.duration;
-      // Synchronise initial position
-      updateScrub(true);
+    const playPromise = heroVideo.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {
+        console.info('[Landing] Autoplay blocked by browser policy.');
+      });
     }
-  });
 
-  // ─── Reduced motion detection ─────────────────────────────────────────────
-  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)');
-  let isReducedMotion = prefersReduced.matches;
+    // When video ends, keep it paused on the final (fully colored) frame
+    heroVideo.addEventListener('ended', () => {
+      heroVideo.pause();
+    });
 
-  prefersReduced.addEventListener('change', (e) => {
-    isReducedMotion = e.matches;
-    if (isReducedMotion) {
-      heroVideo.currentTime = videoDuration;
-    } else {
-      updateScrub(true);
+    // Respect reduced motion: pause video, show poster
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (prefersReduced.matches) {
+      heroVideo.pause();
     }
-  });
-
-  // ─── Scroll-controlled scrubbing engine ───────────────────────────────────
-  let targetProgress = 0;
-  let currentProgress = 0;
-  let isTicking = false;
-  let isSeeking = false;
-
-  function calculateProgress() {
-    const trackRect = heroTrack.getBoundingClientRect();
-    const trackHeight = heroTrack.offsetHeight;
-    const windowHeight = window.innerHeight;
-    const scrollableDistance = trackHeight - windowHeight;
-
-    if (scrollableDistance <= 0) return 0;
-
-    const scrolled = -trackRect.top;
-    const rawProgress = scrolled / scrollableDistance;
-    return Math.min(Math.max(rawProgress, 0), 1);
-  }
-
-  function applyVideoTime(targetTime) {
-    if (!heroVideo || isSeeking) return;
-
-    // Small epsilon to avoid redundant seeks
-    if (Math.abs(heroVideo.currentTime - targetTime) < 0.02) return;
-
-    isSeeking = true;
-    try {
-      if ('fastSeek' in heroVideo && typeof heroVideo.fastSeek === 'function') {
-        heroVideo.fastSeek(targetTime);
+    prefersReduced.addEventListener('change', (e) => {
+      if (e.matches) {
+        heroVideo.pause();
       } else {
-        heroVideo.currentTime = targetTime;
+        heroVideo.play().catch(() => {});
       }
-    } catch {
-      // Video not yet ready for seeking
-    }
-    isSeeking = false;
+    });
   }
 
-  function updateScrub(forceImmediate = false) {
-    if (isReducedMotion) {
-      heroVideo.currentTime = videoDuration;
-      return;
-    }
+  // ─── #7 Keyword Carousel ────────────────────────────────────────────────
+  const keywords = document.querySelectorAll('.hero-keyword');
+  if (keywords.length > 1) {
+    let kwIndex = 0;
+    const kwInterval = setInterval(() => {
+      keywords[kwIndex].classList.remove('hero-keyword--active');
+      kwIndex++;
+      if (kwIndex >= keywords.length) {
+        // Finished one full cycle — stop on the last word
+        kwIndex = keywords.length - 1;
+        keywords[kwIndex].classList.add('hero-keyword--active');
+        clearInterval(kwInterval);
+        return;
+      }
+      keywords[kwIndex].classList.add('hero-keyword--active');
+    }, 2500);
+  }
 
-    targetProgress = calculateProgress();
+  // ─── #13 Mouse-reactive Spotlight ───────────────────────────────────────
+  const heroStage = document.querySelector('.hero-stage');
+  const spotlight = document.getElementById('hero-spotlight');
 
-    // Fade scroll hint once user starts scrolling
-    if (scrollHint) {
-      scrollHint.style.opacity = targetProgress > 0.03 ? '0' : '1';
-    }
+  if (heroStage && spotlight) {
+    let spotlightX = 0, spotlightY = 0;
+    let targetX = 0, targetY = 0;
+    let spotlightRAF = null;
 
-    if (forceImmediate) {
-      currentProgress = targetProgress;
-      applyVideoTime(currentProgress * videoDuration);
-      return;
-    }
+    heroStage.addEventListener('mousemove', (e) => {
+      const rect = heroStage.getBoundingClientRect();
+      targetX = e.clientX - rect.left;
+      targetY = e.clientY - rect.top;
 
-    if (!isTicking) {
-      isTicking = true;
-      requestAnimationFrame(renderScrubFrame);
+      if (!spotlightRAF) {
+        spotlightRAF = requestAnimationFrame(updateSpotlight);
+      }
+    });
+
+    function updateSpotlight() {
+      // Smooth interpolation
+      spotlightX += (targetX - spotlightX) * 0.15;
+      spotlightY += (targetY - spotlightY) * 0.15;
+
+      spotlight.style.left = spotlightX + 'px';
+      spotlight.style.top = spotlightY + 'px';
+
+      // Continue until close enough
+      if (Math.abs(targetX - spotlightX) > 0.5 || Math.abs(targetY - spotlightY) > 0.5) {
+        spotlightRAF = requestAnimationFrame(updateSpotlight);
+      } else {
+        spotlightRAF = null;
+      }
     }
   }
 
-  function renderScrubFrame() {
-    // Smooth lerp toward target scroll progress for silky visual transition
-    const diff = targetProgress - currentProgress;
-    if (Math.abs(diff) > 0.001) {
-      currentProgress += diff * 0.35; // Responsive easing
-    } else {
-      currentProgress = targetProgress;
-    }
+  // ─── #11 Parallax Scroll Layers ─────────────────────────────────────────
+  const landingPage = document.getElementById('landing-page');
+  const heroContent = document.querySelector('.hero-content');
+  const heroVideoWrapper = document.querySelector('.hero-video-wrapper');
+  const scrollHint = document.getElementById('hero-scroll-hint');
+  let scrollHintHidden = false;
 
-    const targetTime = currentProgress * videoDuration;
-    applyVideoTime(targetTime);
+  if (landingPage && (heroContent || heroVideoWrapper)) {
+    let ticking = false;
 
-    // Continue frame rendering if not yet settled
-    if (Math.abs(targetProgress - currentProgress) > 0.001) {
-      requestAnimationFrame(renderScrubFrame);
-    } else {
-      isTicking = false;
-    }
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const scrollY = window.scrollY;
+
+          // Parallax: hero content moves up faster
+          if (heroContent) {
+            heroContent.style.transform = `translateY(${scrollY * -0.3}px)`;
+          }
+
+          // Parallax: video moves up slower
+          if (heroVideoWrapper) {
+            heroVideoWrapper.style.transform = `translateY(${scrollY * -0.15}px)`;
+          }
+
+          // Fade out scroll hint after user starts scrolling
+          if (!scrollHintHidden && scrollHint && scrollY > 50) {
+            scrollHint.classList.add('hero-scroll-hint--hidden');
+            scrollHintHidden = true;
+          }
+
+          ticking = false;
+        });
+        ticking = true;
+      }
+    });
   }
 
-  // ─── Event listeners ──────────────────────────────────────────────────────
-  window.addEventListener('scroll', () => updateScrub(false), { passive: true });
-  window.addEventListener('resize', () => updateScrub(true), { passive: true });
+  // ─── #12 Scroll-triggered Reveal Animations ─────────────────────────────
+  const revealElements = document.querySelectorAll('[data-reveal]');
+  if (revealElements.length > 0 && 'IntersectionObserver' in window) {
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('reveal--visible');
+          revealObserver.unobserve(entry.target); // Only animate once
+        }
+      });
+    }, {
+      root: null,   // Observe within the viewport
+      threshold: 0.15,
+      rootMargin: '0px 0px -40px 0px'
+    });
 
-  // Initial update
-  updateScrub(true);
+    revealElements.forEach((el) => revealObserver.observe(el));
+  }
 
-  // ─── CTA & Workflow Link Bindings ─────────────────────────────────────────
+  // ─── Stats Counter Animation ────────────────────────────────────────────
+  const statCounters = document.querySelectorAll('[data-count]');
+  if (statCounters.length > 0 && 'IntersectionObserver' in window) {
+    const counterObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const el = entry.target;
+          const target = parseInt(el.dataset.count, 10);
+          if (isNaN(target)) return;
+          animateCounter(el, 0, target, 1500);
+          counterObserver.unobserve(el);
+        }
+      });
+    }, {
+      root: null,
+      threshold: 0.5
+    });
+
+    statCounters.forEach((el) => counterObserver.observe(el));
+  }
+
+  function animateCounter(el, start, end, duration) {
+    const range = end - start;
+    const startTime = performance.now();
+
+    function step(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(start + range * eased);
+      el.textContent = current;
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    }
+
+    requestAnimationFrame(step);
+  }
+
+  // ─── CTA & Navigation Bindings ──────────────────────────────────────────
   const openButtons = document.querySelectorAll(
     '#hero-open-app-btn, #nav-open-app-btn, #cta-open-app-btn, .landing-open-btn'
   );
@@ -173,12 +231,11 @@ export function initLandingPage({ onOpenApp }) {
     });
   });
 
-  // Brand click in nav scrolls to top
+  // Brand click in nav
   const brandNav = document.getElementById('landing-brand-link');
   if (brandNav) {
     brandNav.addEventListener('click', (e) => {
       e.preventDefault();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   }
 }

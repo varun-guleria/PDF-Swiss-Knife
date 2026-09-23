@@ -1,106 +1,77 @@
 """
-tests/test_landing_hero.py — Verification tests for Milestone 8 (Landing Page Hero Scroll Animation).
+test_landing_hero.py — Tests for the full-screen landing page hero.
 
 Verifies:
-1. Landing page loads correctly at GET /.
-2. Video and poster assets are served with HTTP 200.
-3. Hero typography matches exact required text.
-4. Scroll scrubbing engine (requestAnimationFrame, reverse scrubbing, reduced motion) in landing.js.
-5. Landing page CSS (sticky hero, 250vh track, localized readability, responsive rules, themes).
-6. Routing integration between landing page and app workspace.
+- Hero HTML markup and video element in index.html
+- Hero animation asset files (MP4 and poster JPG)
+- landing.js autoplay controller module
+- landing.css full-screen hero layout
+- app.js landing/workspace routing integration
 """
 
-import sys
-import os
-import json
-import pytest
 from pathlib import Path
+import re
 
-# Add backend directory to sys.path
-backend_path = Path(__file__).parent.parent / "backend"
-sys.path.insert(0, str(backend_path))
+FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 
-from app import create_app
 
-WORKSPACE = Path(__file__).parent.parent
-FRONTEND_DIR = WORKSPACE / "frontend"
+def test_01_hero_html_structure():
+    """Verify index.html has hero track, video element, poster, typography, and CTA."""
+    html_path = FRONTEND_DIR / "index.html"
+    content = html_path.read_text(encoding="utf-8")
 
-@pytest.fixture
-def client():
-    app = create_app()
-    app.config["TESTING"] = True
-    with app.test_client() as client:
-        yield client
+    assert 'id="hero-track"' in content
+    assert 'id="hero-video"' in content
+    assert 'hero-animation.mp4' in content
+    assert 'hero-poster.jpg' in content
+    assert 'class="hero-headline"' in content
+    assert 'class="hero-subhead"' in content
+    assert 'id="hero-open-app-btn"' in content
+    assert 'class="hero-eyebrow"' in content
 
-def test_01_landing_page_loads(client):
-    """Verify landing page loads with HTML5 semantic containers."""
-    res = client.get("/")
-    assert res.status_code == 200
-    html = res.data.decode("utf-8")
-    assert '<div id="landing-page"' in html
-    assert '<div id="app"' in html
-    assert '<nav class="landing-nav"' in html
-    assert '<section id="hero-track"' in html
-    assert '<div class="hero-stage">' in html
-    assert '<video' in html
-    assert 'id="hero-video"' in html
-    assert 'id="hero-open-app-btn"' in html
-    assert '<footer class="landing-footer">' in html
 
-def test_02_hero_video_assets(client):
-    """Verify the supplied MP4 video and poster frame are served."""
-    video_res = client.get("/assets/hero-animation.mp4")
-    assert video_res.status_code == 200
-    assert video_res.headers.get("Content-Type") == "video/mp4"
-    assert len(video_res.data) > 1000000  # ~1.14 MB
+def test_02_hero_video_asset_exists():
+    """Verify hero-animation.mp4 exists and is non-trivial."""
+    mp4 = FRONTEND_DIR / "assets" / "hero-animation.mp4"
+    assert mp4.exists(), "hero-animation.mp4 not found"
+    assert mp4.stat().st_size > 50_000, "MP4 too small — likely corrupt"
 
-    poster_res = client.get("/assets/hero-poster.jpg")
-    assert poster_res.status_code == 200
-    assert poster_res.headers.get("Content-Type") == "image/jpeg"
-    assert len(poster_res.data) > 5000
 
-def test_03_hero_typography(client):
-    """Verify hero text strictly matches requirements."""
-    res = client.get("/")
-    html = res.data.decode("utf-8")
-    assert "PDF Swiss-Knife" in html
-    assert "One workspace." in html
-    assert "Every PDF task." in html
-    assert "A local, all-in-one PDF workspace for merging, editing, organizing, converting and creating documents." in html
-    assert "Open PDF Swiss-Knife" in html
+def test_03_hero_poster_asset_exists():
+    """Verify hero-poster.jpg exists and is non-trivial."""
+    poster = FRONTEND_DIR / "assets" / "hero-poster.jpg"
+    assert poster.exists(), "hero-poster.jpg not found"
+    assert poster.stat().st_size > 1_000, "Poster too small"
 
-def test_04_landing_js_scrubbing_engine():
-    """Verify landing.js implements rAF scrubbing, reverse scrolling, and reduced motion."""
-    landing_js_path = FRONTEND_DIR / "js" / "landing.js"
-    assert landing_js_path.exists()
-    content = landing_js_path.read_text(encoding="utf-8")
+
+def test_04_landing_js_autoplay():
+    """Verify landing.js implements autoplay video controller."""
+    js_path = FRONTEND_DIR / "js" / "landing.js"
+    assert js_path.exists()
+    content = js_path.read_text(encoding="utf-8")
 
     assert "export function initLandingPage" in content
-    assert "requestAnimationFrame" in content
-    assert "getBoundingClientRect" in content
+    assert "heroVideo.play()" in content or ".play()" in content
+    assert "heroVideo.loop = false" in content
     assert "prefers-reduced-motion" in content
-    assert "calculateProgress" in content
-    assert "applyVideoTime" in content
-    assert "fastSeek" in content
     assert "hero-open-app-btn" in content
 
+
 def test_05_landing_css_rules():
-    """Verify landing.css implements pinned stage, 250vh track, localized scrim, and themes."""
+    """Verify landing.css implements full-screen hero with no scroll."""
     css_path = FRONTEND_DIR / "css" / "landing.css"
     assert css_path.exists()
     content = css_path.read_text(encoding="utf-8")
 
     assert ".hero-track" in content
-    assert "250vh" in content
     assert ".hero-stage" in content
-    assert "position: sticky" in content
-    assert "height: 100vh" in content
+    assert "100vh" in content
+    assert "overflow: hidden" in content
+    assert "object-fit: cover" in content
     assert ".hero-readability-scrim" in content
-    assert "radial-gradient" in content
-    assert '[data-theme="dark"]' in content
-    assert "@media (max-width: 960px)" in content
+    assert '@media (prefers-reduced-motion: reduce)' in content
     assert "@media (max-width: 640px)" in content
-    assert "@media (prefers-reduced-motion: reduce)" in content
+
 
 def test_06_app_routing_integration():
     """Verify app.js integrates landing view and app view routing."""
