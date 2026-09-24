@@ -11,6 +11,7 @@ from typing import List, Dict, Any, Optional, Callable
 
 import pypdfium2 as pdfium
 from PIL import Image
+from pathlib import Path
 
 
 class PdfConvertError(Exception):

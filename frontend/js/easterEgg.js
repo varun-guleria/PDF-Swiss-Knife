@@ -100,12 +100,20 @@
           
           if (activeKnife) {
             activeKnife._state.isDragging = false;
+            
+            // If user stopped mouse for > 50ms before releasing, velocity is 0
+            if (performance.now() - lastTime > 50) {
+              activeKnife._state.vx = 0;
+              activeKnife._state.vy = 0;
+            }
+            
             // Cap throw speeds so it doesn't clip through walls
             activeKnife._state.vx = Math.max(-60, Math.min(60, activeKnife._state.vx));
             activeKnife._state.vy = Math.max(-60, Math.min(60, activeKnife._state.vy));
             
             // Start physics loop
-            requestAnimationFrame(() => updatePhysics(activeKnife));
+            const knifeToThrow = activeKnife;
+            requestAnimationFrame(() => updatePhysics(knifeToThrow));
             activeKnife = null;
           }
         };

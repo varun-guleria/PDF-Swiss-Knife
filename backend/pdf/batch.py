@@ -12,6 +12,7 @@ Output count = len(unique_pdfs).
 from typing import List, Callable, Optional, Dict, Any
 
 from pypdf import PdfReader, PdfWriter
+from pathlib import Path
 
 
 

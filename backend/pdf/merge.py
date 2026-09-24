@@ -7,8 +7,8 @@ Uses pypdf for high performance and minimal memory usage.
 
 
 from typing import List, Callable, Optional, Dict, Any
+from pathlib import Path
 from pypdf import PdfReader, PdfWriter
-
 
 
 class PdfMergeError(Exception):

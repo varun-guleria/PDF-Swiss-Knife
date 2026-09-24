@@ -15,6 +15,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
 from reportlab.pdfgen import canvas
 from reportlab.lib.colors import Color
+from pathlib import Path
 
 
 class PdfEditError(Exception):
