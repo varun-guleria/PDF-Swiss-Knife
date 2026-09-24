@@ -10,7 +10,7 @@
 # before or after deploying!
 [[redirects]]
   from = "/api/*"
-  to = "https://your-python-backend-url.com/api/:splat"
+  to = "https://pdf-swiss-knife.onrender.com/api/:splat"
   status = 200
   force = true
 
