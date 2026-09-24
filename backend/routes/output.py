@@ -8,7 +8,7 @@ GET /api/output/<job_id>/list             → list output files for a job
 
 import zipfile
 import io
-from pathlib import Path
+
 from flask import Blueprint, jsonify, send_file, abort
 
 from services.file_manager import get_job_output_dir

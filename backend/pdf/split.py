@@ -1,3 +1,4 @@
+from pathlib import Path
 """
 pdf/split.py — PDF Split engine.
 
@@ -7,7 +8,7 @@ Split a PDF into multiple parts by:
   - Into individual single pages
 """
 
-from pathlib import Path
+
 from typing import List, Dict, Any, Optional, Callable
 
 from pypdf import PdfReader, PdfWriter

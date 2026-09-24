@@ -1,3 +1,4 @@
+from pathlib import Path
 """
 pdf/pages.py — Page-level operations engine.
 
@@ -6,7 +7,7 @@ and page manipulations (reorder, rotate, delete, duplicate, extract) via pypdf.
 """
 
 import io
-from pathlib import Path
+
 from typing import List, Dict, Any, Optional
 from pypdf import PdfReader, PdfWriter
 import pypdfium2 as pdfium

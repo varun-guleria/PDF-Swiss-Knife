@@ -8,11 +8,11 @@ and records failures for the caller.
 Output count = len(unique_pdfs).
 """
 
-from pathlib import Path
+
 from typing import List, Callable, Optional, Dict, Any
 
 from pypdf import PdfReader, PdfWriter
-from pypdf.errors import PdfReadError
+
 
 
 class PdfBatchError(Exception):

@@ -1,3 +1,4 @@
+from pathlib import Path
 """
 routes/pages.py — Page organization routes.
 
@@ -9,7 +10,7 @@ POST /api/pages/reorganize                    → submit page reorganization job
 import json
 import threading
 import logging
-from pathlib import Path
+
 from flask import Blueprint, request, jsonify, send_file, abort
 
 from services.job_manager import create_job, update_job

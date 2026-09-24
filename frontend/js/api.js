@@ -293,10 +293,9 @@ export async function imagesToPdf(files, outputName = 'images_combined.pdf') {
 // ─── Optimize ───────────────────────────────────────────────────────────────
 
 /** Compress PDF */
-export async function compressPdf(file, quality = 60) {
+export async function compressPdf(file) {
   const fd = new FormData();
   fd.append('file', file);
-  fd.append('quality', String(quality));
   return upload('/api/optimize/compress', fd);
 }
 

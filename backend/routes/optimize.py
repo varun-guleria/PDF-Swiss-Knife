@@ -8,7 +8,7 @@ POST /api/optimize/info      — Get PDF information
 
 import threading
 import logging
-from pathlib import Path
+
 from flask import Blueprint, request, jsonify
 
 from services.job_manager import create_job, update_job
@@ -30,11 +30,6 @@ def run_compress():
     if not files:
         return jsonify({"error": "Please upload a PDF file."}), 400
 
-    try:
-        quality = int(request.form.get("quality", "60"))
-    except ValueError:
-        quality = 60
-
     job_id = create_job()
     temp_dir = create_job_temp_dir(job_id)
     output_dir = create_job_output_dir(job_id)
@@ -47,7 +42,7 @@ def run_compress():
     def worker():
         try:
             update_job(job_id, status="running", message="Compressing PDF…")
-            result = compress_pdf(input_path, output_path, image_quality=quality)
+            result = compress_pdf(input_path, output_path)
             update_job(job_id, status="done", completed=1, total=1, current=1,
                        result_path=output_dir,
                        message=f"Compressed: {result['savings_percent']}% smaller "

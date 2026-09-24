@@ -6,7 +6,7 @@ pdf/convert.py — PDF ↔ Image conversion engine.
 """
 
 import io
-from pathlib import Path
+
 from typing import List, Dict, Any, Optional, Callable
 
 import pypdfium2 as pdfium

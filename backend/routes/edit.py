@@ -8,7 +8,7 @@ POST /api/edit/header-footer   — Add header/footer
 
 import threading
 import logging
-from pathlib import Path
+
 from flask import Blueprint, request, jsonify
 
 from services.job_manager import create_job, update_job

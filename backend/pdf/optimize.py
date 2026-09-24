@@ -1,3 +1,4 @@
+from pathlib import Path
 """
 pdf/optimize.py — PDF optimization, repair, and information engine.
 
@@ -7,7 +8,7 @@ pdf/optimize.py — PDF optimization, repair, and information engine.
 """
 
 import io
-from pathlib import Path
+
 from typing import Dict, Any
 from datetime import datetime
 
@@ -22,16 +23,13 @@ class PdfOptimizeError(Exception):
 def compress_pdf(
     input_path: Path,
     output_path: Path,
-    image_quality: int = 60,
 ) -> Dict[str, Any]:
     """
-    Compress a PDF by removing unused objects and optionally
-    reducing image quality.
+    Compress a PDF by removing unused objects.
 
     Args:
         input_path: Source PDF path.
         output_path: Destination PDF path.
-        image_quality: JPEG quality for re-encoded images (1-95).
 
     Returns:
         Dict with original_size, compressed_size, savings_percent.

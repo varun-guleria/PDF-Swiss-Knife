@@ -31,7 +31,7 @@ JOB_TTL_SECONDS = 3600  # 1 hour
 # ─── Frontend polling ─────────────────────────────────────────────────────────
 
 # Advisory value sent to frontend; frontend uses this as its poll interval
-POLL_INTERVAL_MS = 500
+
 
 # ─── Filenames ────────────────────────────────────────────────────────────────
 

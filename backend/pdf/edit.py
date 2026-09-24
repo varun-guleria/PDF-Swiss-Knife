@@ -7,7 +7,7 @@ pdf/edit.py — PDF editing operations engine.
 """
 
 import io
-from pathlib import Path
+
 from typing import Dict, Any, Optional
 
 from pypdf import PdfReader, PdfWriter

@@ -1,3 +1,4 @@
+from pathlib import Path
 """
 pdf/security.py — PDF protection and password management engine.
 
@@ -5,7 +6,7 @@ pdf/security.py — PDF protection and password management engine.
   - unprotect_pdf: Remove password protection from a PDF.
 """
 
-from pathlib import Path
+
 from typing import Dict, Any, Optional
 
 

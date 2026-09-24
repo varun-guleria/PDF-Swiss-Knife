@@ -5,10 +5,10 @@ Merges multiple PDF files in specified order into a single PDF document.
 Uses pypdf for high performance and minimal memory usage.
 """
 
-from pathlib import Path
+
 from typing import List, Callable, Optional, Dict, Any
 from pypdf import PdfReader, PdfWriter
-from pypdf.errors import PdfReadError
+
 
 
 class PdfMergeError(Exception):
