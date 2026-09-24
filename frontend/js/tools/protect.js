@@ -14,6 +14,7 @@ export function renderProtect(container) {
     submitLabel: 'Protect PDF',
     submitIcon: 'lock',
     progressTitle: 'Encrypting PDF…',
+    illustration: '/assets/protect-illustration.jpg',
     renderOptions: (body) => {
       body.innerHTML = `
         <div style="display:flex;flex-direction:column;gap:var(--space-5);">

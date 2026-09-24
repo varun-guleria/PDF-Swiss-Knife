@@ -50,6 +50,7 @@ export function createSingleFileTool(opts) {
     progressTitle,
     usePolling = true,
     getSuccessActions,
+    illustration = '',
   } = opts;
 
   let selectedFile = null;
@@ -93,6 +94,8 @@ export function createSingleFileTool(opts) {
         </div>
       </div>
 
+      ${illustration ? `<div id="sft-illustration-container" style="text-align:center;margin-top:var(--space-8);padding-bottom:var(--space-8);transform:translateX(250px);"><img src="${escapeHtml(illustration)}" alt="${escapeHtml(title)} Illustration" style="max-width:100%;height:auto;max-height:280px;object-fit:contain;opacity:0.9;" /></div>` : ''}
+
       <div id="sft-progress-container" style="display:none;"></div>
     </div>
   `;
@@ -107,6 +110,7 @@ export function createSingleFileTool(opts) {
   const changeBtn = panel.querySelector('#sft-change-file');
   const submitBtn = panel.querySelector('#sft-submit-btn');
   const progressContainer = panel.querySelector('#sft-progress-container');
+  const illustrationContainer = panel.querySelector('#sft-illustration-container');
 
   const filterFn = fileFilter === 'image' ? isImage : isPdf;
 
@@ -127,6 +131,7 @@ export function createSingleFileTool(opts) {
 
     dropzoneContainer.style.display = 'none';
     optionsCard.style.display = 'block';
+    if (illustrationContainer) illustrationContainer.style.display = 'none';
 
     // Render tool-specific options
     optionsBody.innerHTML = '';
@@ -152,6 +157,7 @@ export function createSingleFileTool(opts) {
     selectedFiles = [];
     optionsCard.style.display = 'none';
     dropzoneContainer.style.display = 'block';
+    if (illustrationContainer) illustrationContainer.style.display = 'block';
   });
 
   submitBtn.addEventListener('click', async () => {
@@ -283,6 +289,7 @@ export function createSingleFileTool(opts) {
     progressContainer.innerHTML = '';
     optionsCard.style.display = 'none';
     dropzoneContainer.style.display = 'block';
+    if (illustrationContainer) illustrationContainer.style.display = 'block';
   }
 
   if (window.lucide) window.lucide.createIcons({ node: panel });

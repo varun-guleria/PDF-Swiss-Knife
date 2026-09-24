@@ -14,6 +14,7 @@ export function renderCrop(container) {
     submitLabel: 'Crop Pages',
     submitIcon: 'crop',
     progressTitle: 'Cropping Pages…',
+    illustration: '/assets/crop-illustration.jpg',
     renderOptions: (body) => {
       body.innerHTML = `
         <div style="display:flex;flex-direction:column;gap:var(--space-5);">

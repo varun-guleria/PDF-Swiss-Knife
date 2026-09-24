@@ -14,6 +14,7 @@ export function renderPageNumbers(container) {
     submitLabel: 'Add Page Numbers',
     submitIcon: 'hash',
     progressTitle: 'Adding page numbers…',
+    illustration: '/assets/pagenums-illustration.jpg',
     renderOptions: (body) => {
       body.innerHTML = `
         <div style="display:flex;flex-direction:column;gap:var(--space-5);">

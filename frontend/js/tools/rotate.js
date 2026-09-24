@@ -48,6 +48,7 @@ export function renderRotate(container) {
         </div>
       </div>
       <div id="rotate-progress" style="display:none;"></div>
+      <div id="rotate-illustration" style="text-align:center;margin-top:var(--space-8);padding-bottom:var(--space-8);transform:translateX(250px);"><img src="/assets/rotate-illustration.jpg" alt="Rotate Illustration" style="max-width:100%;height:auto;max-height:280px;object-fit:contain;opacity:0.9;" /></div>
     </div>
   `;
   container.appendChild(panel);
@@ -55,6 +56,7 @@ export function renderRotate(container) {
   const dropzone = panel.querySelector('#rotate-dropzone');
   const optionsCard = panel.querySelector('#rotate-options');
   const progressEl = panel.querySelector('#rotate-progress');
+  const illustrationEl = panel.querySelector('#rotate-illustration');
 
   createDropzone({
     container: dropzone, accept: '.pdf,application/pdf', multiple: false,
@@ -68,6 +70,7 @@ export function renderRotate(container) {
         panel.querySelector('#rotate-filename').textContent = `${selectedFile.name} — ${docInfo.page_count} pages`;
         dropzone.style.display = 'none';
         optionsCard.style.display = 'block';
+        if (illustrationEl) illustrationEl.style.display = 'none';
       } catch (e) { alert(e.message); }
       if (window.lucide) window.lucide.createIcons({ node: panel });
     },

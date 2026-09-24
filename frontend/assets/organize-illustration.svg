@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" fill="none">
+  <!-- Page 1 (being moved up) -->
+  <g transform="translate(80, 120)">
+    <rect x="4" y="6" width="110" height="150" rx="8" fill="#00000015"/>
+    <rect x="0" y="0" width="110" height="150" rx="8" fill="white" stroke="#1a1a2e" stroke-width="3.5"/>
+    <rect x="0" y="0" width="110" height="35" rx="8" fill="#e53935" stroke="#1a1a2e" stroke-width="3.5"/>
+    <text x="55" y="24" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white" text-anchor="middle">1</text>
+    <rect x="15" y="50" width="80" height="5" rx="2.5" fill="#e0e0e0"/>
+    <rect x="15" y="65" width="60" height="5" rx="2.5" fill="#e0e0e0"/>
+    <rect x="15" y="80" width="70" height="5" rx="2.5" fill="#e0e0e0"/>
+    <rect x="15" y="95" width="50" height="5" rx="2.5" fill="#e0e0e0"/>
+    <!-- Vibration -->
+    <path d="M-12 30 Q-20 35 -12 40" stroke="#1a1a2e" stroke-width="2.5" fill="none"/>
+    <path d="M-12 60 Q-20 65 -12 70" stroke="#1a1a2e" stroke-width="2.5" fill="none"/>
+  </g>
+
+  <!-- Page 3 (being dragged - highlighted) -->
+  <g transform="translate(250, 80) rotate(-5)">
+    <rect x="6" y="8" width="110" height="150" rx="8" fill="#00000020"/>
+    <rect x="0" y="0" width="110" height="150" rx="8" fill="#fff9c4" stroke="#f9a825" stroke-width="4"/>
+    <rect x="0" y="0" width="110" height="35" rx="8" fill="#f9a825" stroke="#f9a825" stroke-width="3"/>
+    <text x="55" y="24" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white" text-anchor="middle">3</text>
+    <rect x="15" y="50" width="80" height="5" rx="2.5" fill="#f0e68c"/>
+    <rect x="15" y="65" width="60" height="5" rx="2.5" fill="#f0e68c"/>
+    <rect x="15" y="80" width="70" height="5" rx="2.5" fill="#f0e68c"/>
+    <!-- Drag handle dots -->
+    <circle cx="55" cy="125" r="3" fill="#f9a825"/>
+    <circle cx="45" cy="125" r="3" fill="#f9a825"/>
+    <circle cx="65" cy="125" r="3" fill="#f9a825"/>
+    <!-- Motion lines -->
+    <path d="M-15 50 L-30 50" stroke="#1a1a2e" stroke-width="2" stroke-dasharray="4 4"/>
+    <path d="M-15 70 L-25 70" stroke="#1a1a2e" stroke-width="2" stroke-dasharray="4 4"/>
+    <path d="M125 50 L140 50" stroke="#1a1a2e" stroke-width="2" stroke-dasharray="4 4"/>
+  </g>
+
+  <!-- Page 2 -->
+  <g transform="translate(420, 130)">
+    <rect x="4" y="6" width="110" height="150" rx="8" fill="#00000015"/>
+    <rect x="0" y="0" width="110" height="150" rx="8" fill="white" stroke="#1a1a2e" stroke-width="3.5"/>
+    <rect x="0" y="0" width="110" height="35" rx="8" fill="#e53935" stroke="#1a1a2e" stroke-width="3.5"/>
+    <text x="55" y="24" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white" text-anchor="middle">2</text>
+    <rect x="15" y="50" width="80" height="5" rx="2.5" fill="#e0e0e0"/>
+    <rect x="15" y="65" width="60" height="5" rx="2.5" fill="#e0e0e0"/>
+    <rect x="15" y="80" width="70" height="5" rx="2.5" fill="#e0e0e0"/>
+    <rect x="15" y="95" width="50" height="5" rx="2.5" fill="#e0e0e0"/>
+    <path d="M122 40 Q132 45 122 50" stroke="#1a1a2e" stroke-width="2.5" fill="none"/>
+  </g>
+
+  <!-- Page 4 -->
+  <g transform="translate(590, 110)">
+    <rect x="4" y="6" width="110" height="150" rx="8" fill="#00000015"/>
+    <rect x="0" y="0" width="110" height="150" rx="8" fill="white" stroke="#1a1a2e" stroke-width="3.5"/>
+    <rect x="0" y="0" width="110" height="35" rx="8" fill="#e53935" stroke="#1a1a2e" stroke-width="3.5"/>
+    <text x="55" y="24" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white" text-anchor="middle">4</text>
+    <rect x="15" y="50" width="80" height="5" rx="2.5" fill="#e0e0e0"/>
+    <rect x="15" y="65" width="60" height="5" rx="2.5" fill="#e0e0e0"/>
+    <rect x="15" y="80" width="70" height="5" rx="2.5" fill="#e0e0e0"/>
+    <rect x="15" y="95" width="50" height="5" rx="2.5" fill="#e0e0e0"/>
+    <path d="M122 60 Q132 65 122 70" stroke="#1a1a2e" stroke-width="2.5" fill="none"/>
+    <path d="M122 90 Q132 95 122 100" stroke="#1a1a2e" stroke-width="2.5" fill="none"/>
+  </g>
+
+  <!-- Curved reorder arrows -->
+  <!-- Arrow from page 3 position to page 1 position -->
+  <path d="M310 60 C310 20 150 20 150 60" stroke="#43a047" stroke-width="4" fill="none" marker-end="url(#arrowGreen)"/>
+  <!-- Arrow from page 1 to page 2 position -->
+  <path d="M180 300 C180 350 440 350 440 310" stroke="#1e88e5" stroke-width="3.5" fill="none" stroke-dasharray="8 4" marker-end="url(#arrowBlue)"/>
+
+  <!-- Arrow markers -->
+  <defs>
+    <marker id="arrowGreen" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#43a047"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#1e88e5"/>
+    </marker>
+  </defs>
+
+  <!-- Cartoon hand dragging -->
+  <g transform="translate(270, 200)">
+    <!-- Hand shape -->
+    <ellipse cx="30" cy="20" rx="22" ry="16" fill="#ffcc80" stroke="#1a1a2e" stroke-width="3"/>
+    <rect x="10" y="18" width="15" height="30" rx="7" fill="#ffcc80" stroke="#1a1a2e" stroke-width="2.5"/>
+    <rect x="25" y="14" width="12" height="28" rx="6" fill="#ffcc80" stroke="#1a1a2e" stroke-width="2.5"/>
+    <rect x="37" y="16" width="12" height="25" rx="6" fill="#ffcc80" stroke="#1a1a2e" stroke-width="2.5"/>
+    <!-- Thumb -->
+    <ellipse cx="12" cy="15" rx="10" ry="8" fill="#ffcc80" stroke="#1a1a2e" stroke-width="2.5"/>
+  </g>
+
+  <!-- Sparkles -->
+  <g fill="#ffd54f" stroke="#1a1a2e" stroke-width="1.5">
+    <path d="M50 50 l4-12 4 12 12-4-12 4-4 12-4-12-12 4z"/>
+    <path d="M750 50 l4-12 4 12 12-4-12 4-4 12-4-12-12 4z"/>
+    <path d="M400 400 l5-15 5 15 15-5-15 5-5 15-5-15-15 5z"/>
+    <path d="M700 350 l3-10 3 10 10-3-10 3-3 10-3-10-10 3z"/>
+  </g>
+</svg>

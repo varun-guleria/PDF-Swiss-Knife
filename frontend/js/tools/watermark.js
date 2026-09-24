@@ -14,6 +14,7 @@ export function renderWatermark(container) {
     submitLabel: 'Apply Watermark',
     submitIcon: 'droplets',
     progressTitle: 'Applying watermark…',
+    illustration: '/assets/watermark-illustration.jpg',
     renderOptions: (body) => {
       body.innerHTML = `
         <div style="display:flex;flex-direction:column;gap:var(--space-5);">

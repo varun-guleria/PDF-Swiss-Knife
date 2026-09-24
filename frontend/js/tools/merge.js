@@ -75,6 +75,11 @@ export function renderMerge(container) {
         </div>
       </div>
 
+      <!-- Illustration -->
+      <div id="merge-illustration-container" style="text-align: center; margin-top: var(--space-8); padding-bottom: var(--space-8); transform: translateX(250px);">
+        <img src="/assets/merge-illustration.png" alt="Merge Illustration" style="max-width: 100%; height: auto; max-height: 280px; object-fit: contain; opacity: 0.9;" />
+      </div>
+
       <!-- Progress / Results Container -->
       <div id="merge-progress-container" style="display:none;"></div>
     </div>
@@ -91,6 +96,7 @@ export function renderMerge(container) {
   const submitBtn = panel.querySelector('#merge-submit-btn');
   const outputNameInput = panel.querySelector('#merge-output-name');
   const progressContainer = panel.querySelector('#merge-progress-container');
+  const illustrationContainer = panel.querySelector('#merge-illustration-container');
 
   function updateUiState() {
     const count = selectedFiles.length;
@@ -101,6 +107,7 @@ export function renderMerge(container) {
 
     if (count > 0) {
       fileListCard.style.display = 'block';
+      if (illustrationContainer) illustrationContainer.style.display = 'none';
       submitBtn.disabled = count < 2 || isProcessing;
       if (count < 2) {
         submitBtn.title = 'Add at least 2 PDF files to merge';
@@ -109,6 +116,7 @@ export function renderMerge(container) {
       }
     } else {
       fileListCard.style.display = 'none';
+      if (illustrationContainer) illustrationContainer.style.display = 'block';
     }
   }
 

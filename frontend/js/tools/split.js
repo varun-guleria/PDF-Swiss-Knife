@@ -14,6 +14,7 @@ export function renderSplit(container) {
     submitLabel: 'Split PDF',
     submitIcon: 'scissors',
     progressTitle: 'Splitting PDF…',
+    illustration: '/assets/split-illustration.jpg',
     renderOptions: (body) => {
       body.innerHTML = `
         <div style="display:flex;flex-direction:column;gap:var(--space-5);">

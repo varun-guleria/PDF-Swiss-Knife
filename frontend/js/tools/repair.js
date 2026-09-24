@@ -14,6 +14,7 @@ export function renderRepair(container) {
     submitLabel: 'Repair PDF',
     submitIcon: 'wrench',
     progressTitle: 'Repairing PDF…',
+    illustration: '/assets/repair-illustration.jpg',
     renderOptions: (body) => {
       body.innerHTML = `
         <div style="padding:var(--space-3);border-radius:var(--radius-md);background:var(--color-surface-secondary);font-size:var(--font-size-sm);color:var(--color-text-secondary);">

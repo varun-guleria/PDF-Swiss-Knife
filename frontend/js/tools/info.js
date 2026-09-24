@@ -17,12 +17,14 @@ export function renderInfo(container) {
     <div class="tool-workspace" style="display:flex;flex-direction:column;gap:var(--space-6);">
       <div id="info-dropzone"></div>
       <div id="info-results" style="display:none;"></div>
+      <div id="info-illustration" style="text-align:center;margin-top:var(--space-4);padding-bottom:var(--space-8);transform:translateX(250px);"><img src="/assets/info-illustration.svg" alt="PDF Information Illustration" style="max-width:100%;height:auto;max-height:280px;object-fit:contain;opacity:0.9;" /></div>
     </div>
   `;
   container.appendChild(panel);
 
   const dropzoneEl = panel.querySelector('#info-dropzone');
   const resultsEl = panel.querySelector('#info-results');
+  const illustrationEl = panel.querySelector('#info-illustration');
 
   createDropzone({
     container: dropzoneEl, accept: '.pdf,application/pdf', multiple: false,
@@ -36,6 +38,7 @@ export function renderInfo(container) {
         const info = await api.getPdfInfo(valid[0]);
         dropzoneEl.style.display = 'none';
         resultsEl.style.display = 'block';
+        if (illustrationEl) illustrationEl.style.display = 'none';
 
         const metaRows = Object.entries(info.metadata || {}).map(([k, v]) =>
           `<tr><td style="font-weight:var(--font-weight-medium);padding:var(--space-2) var(--space-4);white-space:nowrap;color:var(--color-text-secondary);">${escapeHtml(k)}</td>
@@ -103,6 +106,7 @@ export function renderInfo(container) {
         resultsEl.querySelector('#info-another').addEventListener('click', () => {
           resultsEl.style.display = 'none';
           dropzoneEl.style.display = 'block';
+          if (illustrationEl) illustrationEl.style.display = 'block';
         });
 
         if (window.lucide) window.lucide.createIcons({ node: resultsEl });

@@ -14,6 +14,7 @@ export function renderUnprotect(container) {
     submitLabel: 'Remove Protection',
     submitIcon: 'unlock',
     progressTitle: 'Removing protection…',
+    illustration: '/assets/unprotect-illustration.jpg',
     renderOptions: (body) => {
       body.innerHTML = `
         <div>

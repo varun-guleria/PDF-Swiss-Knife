@@ -14,6 +14,7 @@ export function renderCompress(container) {
     submitLabel: 'Compress PDF',
     submitIcon: 'minimize-2',
     progressTitle: 'Compressing PDF…',
+    illustration: '/assets/compress-illustration.jpg',
     renderOptions: (body) => {
       body.innerHTML = `
         <div>

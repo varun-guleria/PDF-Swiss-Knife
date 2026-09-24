@@ -38,6 +38,7 @@ export function renderExtract(container) {
         </div>
       </div>
       <div id="extract-progress" style="display:none;"></div>
+      <div id="extract-illustration" style="text-align:center;margin-top:var(--space-8);padding-bottom:var(--space-8);transform:translateX(250px);"><img src="/assets/extract-illustration.jpg" alt="Extract Illustration" style="max-width:100%;height:auto;max-height:280px;object-fit:contain;opacity:0.9;" /></div>
     </div>
   `;
   container.appendChild(panel);
@@ -45,6 +46,7 @@ export function renderExtract(container) {
   const dropzone = panel.querySelector('#extract-dropzone');
   const optionsCard = panel.querySelector('#extract-options');
   const progressEl = panel.querySelector('#extract-progress');
+  const illustrationEl = panel.querySelector('#extract-illustration');
 
   createDropzone({
     container: dropzone,
@@ -63,6 +65,7 @@ export function renderExtract(container) {
         panel.querySelector('#extract-page-hint').textContent = `Document has ${docInfo.page_count} pages. Enter page numbers or ranges (e.g. 1, 3-5, 8)`;
         dropzone.style.display = 'none';
         optionsCard.style.display = 'block';
+        if (illustrationEl) illustrationEl.style.display = 'none';
       } catch (e) {
         alert(e.message || 'Failed to inspect PDF');
       }

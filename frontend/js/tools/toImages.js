@@ -14,6 +14,7 @@ export function renderToImages(container) {
     submitLabel: 'Convert to Images',
     submitIcon: 'image',
     progressTitle: 'Converting pages to images…',
+    illustration: '/assets/toImages-illustration.jpg',
     renderOptions: (body) => {
       body.innerHTML = `
         <div style="display:flex;gap:var(--space-6);flex-wrap:wrap;">

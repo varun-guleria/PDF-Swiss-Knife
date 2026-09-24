@@ -97,6 +97,9 @@ export function renderOrganize(container) {
 
       <!-- Progress Container -->
       <div id="organize-progress-container" style="display:none;"></div>
+
+      <!-- Illustration -->
+      <div id="organize-illustration" style="text-align:center;margin-top:var(--space-8);padding-bottom:var(--space-8);transform:translateX(250px);"><img src="/assets/organize-illustration.svg" alt="Organize Pages Illustration" style="max-width:100%;height:auto;max-height:280px;object-fit:contain;opacity:0.9;" /></div>
     </div>
   `;
 
@@ -115,6 +118,7 @@ export function renderOrganize(container) {
   const saveBtn = panel.querySelector('#organize-save-btn');
   const outputNameInput = panel.querySelector('#organize-output-name');
   const progressContainer = panel.querySelector('#organize-progress-container');
+  const illustrationEl = panel.querySelector('#organize-illustration');
 
   let originalInspectData = null;
   let draggedIndex = null;
@@ -249,6 +253,7 @@ export function renderOrganize(container) {
     docFilename = pdfFile.name;
     dropzoneContainer.style.display = 'none';
     loadingCard.style.display = 'block';
+    if (illustrationEl) illustrationEl.style.display = 'none';
 
     try {
       const inspectData = await api.inspectPdf(pdfFile);
@@ -319,6 +324,7 @@ export function renderOrganize(container) {
       docId = null;
       pagesCard.style.display = 'none';
       dropzoneContainer.style.display = 'block';
+      if (illustrationEl) illustrationEl.style.display = 'block';
     }
   });
 

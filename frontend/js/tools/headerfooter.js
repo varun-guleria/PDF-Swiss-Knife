@@ -14,6 +14,7 @@ export function renderHeaderFooter(container) {
     submitLabel: 'Apply Header & Footer',
     submitIcon: 'align-center',
     progressTitle: 'Adding header & footer…',
+    illustration: '/assets/headerfooter-illustration.jpg',
     renderOptions: (body) => {
       const makeRow = (prefix, label) => `
         <div>

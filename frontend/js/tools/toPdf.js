@@ -42,6 +42,7 @@ export function renderToPdf(container) {
         </div>
       </div>
       <div id="topdf-progress" style="display:none;"></div>
+      <div id="topdf-illustration" style="text-align:center;margin-top:var(--space-8);padding-bottom:var(--space-8);transform:translateX(250px);"><img src="/assets/toPdf-illustration.jpg" alt="Images to PDF Illustration" style="max-width:100%;height:auto;max-height:280px;object-fit:contain;opacity:0.9;" /></div>
     </div>
   `;
   container.appendChild(panel);
@@ -53,11 +54,13 @@ export function renderToPdf(container) {
   const clearBtn = panel.querySelector('#topdf-clear');
   const submitBtn = panel.querySelector('#topdf-btn');
   const progressEl = panel.querySelector('#topdf-progress');
+  const illustrationEl = panel.querySelector('#topdf-illustration');
 
   function updateUI() {
     countBadge.textContent = `${selectedFiles.length} images`;
     fileListCard.style.display = selectedFiles.length > 0 ? 'block' : 'none';
     submitBtn.disabled = selectedFiles.length === 0 || isProcessing;
+    if (illustrationEl) illustrationEl.style.display = selectedFiles.length > 0 ? 'none' : 'block';
   }
 
   function addFiles(files) {
