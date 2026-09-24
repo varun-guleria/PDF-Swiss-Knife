@@ -1,0 +1,21 @@
+[build]
+  # The directory containing your static frontend files
+  publish = "frontend"
+  
+  # We don't need a build command for vanilla HTML/JS/CSS
+  command = ""
+
+# Proxy all /api requests to your hosted backend
+# IMPORTANT: Replace the 'to' URL with your actual hosted backend URL (e.g., Render, Railway, Heroku)
+# before or after deploying!
+[[redirects]]
+  from = "/api/*"
+  to = "https://your-python-backend-url.com/api/:splat"
+  status = 200
+  force = true
+
+# Catch-all redirect for Single Page Apps (SPA) routing, if ever needed
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

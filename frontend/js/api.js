@@ -14,8 +14,8 @@
 
 // ─── Configuration ─────────────────────────────────────────────────────────
 
-/** Base URL of the Python backend. Adjust port if changed in config.py */
-const BASE_URL = 'http://127.0.0.1:5000';
+/** Base URL of the backend. Empty string uses relative paths (compatible with Netlify proxy and local Flask server) */
+const BASE_URL = '';
 
 /** Polling interval in milliseconds */
 const POLL_INTERVAL = 500;
