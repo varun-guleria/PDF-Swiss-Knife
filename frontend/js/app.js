@@ -442,7 +442,7 @@ function buildSidebar() {
 
   sidebar.innerHTML = `
     <div class="sidebar__logo" title="Back to Landing Page Overview" style="cursor: pointer;">
-      <img src="/favicon-32x32.png" class="sidebar__logo-icon" alt="PDF Swiss-Knife" style="border-radius:5px;object-fit:contain;" />
+      <img src="/assets/logo_transparent.png" class="sidebar__logo-icon" alt="PDF Swiss-Knife" style="border-radius:5px;object-fit:contain;" />
       <span class="sidebar__logo-text">PDF Swiss-Knife</span>
     </div>
     ${navHtml}
