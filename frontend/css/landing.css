@@ -439,64 +439,27 @@
   font-weight: 600;
   padding: 16px 36px;
   border-radius: 980px;
-  background: #2997ff;
-  color: #ffffff;
+  background: var(--color-brand);
+  color: var(--color-bg-surface);
   border: none;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  box-shadow:
-    0 4px 20px rgba(41, 151, 255, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), background 0.25s ease;
   position: relative;
   overflow: visible;
   letter-spacing: -0.01em;
   z-index: 1;
 }
 
-/* Glass sheen */
-.hero-btn-primary::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 50%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
-  border-radius: 980px 980px 0 0;
-  pointer-events: none;
-}
-
-/* Accent glow pulse */
-.hero-btn-primary::after {
-  content: '';
-  position: absolute;
-  inset: -8px;
-  border-radius: 980px;
-  background: radial-gradient(ellipse at center, rgba(41, 151, 255, 0.25) 0%, transparent 70%);
-  z-index: -1;
-  animation: ctaPulse 3s ease-in-out infinite;
-  pointer-events: none;
-}
-
-@keyframes ctaPulse {
-  0%, 100% { transform: scale(1); opacity: 0.6; }
-  50%      { transform: scale(1.15); opacity: 1; }
-}
-
 .hero-btn-primary:hover {
-  background: #0a84ff;
-  transform: scale(1.05);
-  box-shadow:
-    0 0 0 4px rgba(41, 151, 255, 0.12),
-    0 8px 40px rgba(41, 151, 255, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  background: var(--color-brand-hover);
+  transform: translateY(-2px);
 }
 
 .hero-btn-primary:active {
-  transform: scale(0.97);
+  transform: translateY(0);
 }
 
 /* ─── Scroll Hint ────────────────────────────────────────────────────────── */
@@ -717,7 +680,7 @@
               box-shadow 0.35s ease;
 }
 
-/* Gradient accent stripe on left */
+/* Brand accent stripe on left */
 .workflow-item::before {
   content: '';
   position: absolute;
@@ -726,7 +689,7 @@
   bottom: 12px;
   width: 3px;
   border-radius: 0 3px 3px 0;
-  background: linear-gradient(180deg, #2997ff 0%, #7c5cf5 100%);
+  background: var(--color-brand);
   opacity: 0;
   transition: opacity 0.35s ease;
 }
@@ -745,11 +708,16 @@
 
 .workflow-item:hover .workflow-item__icon {
   transform: scale(1.1);
-  background: linear-gradient(135deg, rgba(41, 151, 255, 0.2) 0%, rgba(124, 92, 245, 0.15) 100%);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .workflow-item:hover .workflow-item__icon svg {
-  color: #4db0ff;
+  color: var(--color-brand);
+}
+
+.workflow-item:hover .workflow-item__title {
+  color: var(--color-brand);
+  transform: translateX(6px);
 }
 
 /* Large bento tile */
@@ -792,6 +760,7 @@
   font-size: 16px;
   font-weight: 600;
   color: #ffffff;
+  transition: color 0.3s ease, transform 0.3s ease;
 }
 
 .workflow-item__desc {

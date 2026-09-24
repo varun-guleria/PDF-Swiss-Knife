@@ -141,19 +141,22 @@ function handleRoute() {
     const toolId = hash.substring(1);
     showAppView(toolId, false);
   } else {
-    // No specific deep link, remain at current scroll pos or top
+    // No specific deep link, remain at current scroll pos or top.
+    // Pre-load the workspace home view so the user doesn't see a spinner if they scroll down.
+    navigate('home', false);
   }
 }
 
 /**
  * Navigate to a tool by ID within the App Workspace.
  * @param {string} toolId
+ * @param {boolean} [syncHash=true] - Whether to update the URL hash
  */
-function navigate(toolId) {
+function navigate(toolId, syncHash = true) {
   currentToolId = toolId;
 
   // Sync URL hash
-  if (window.location.hash !== `#/app/${toolId}` && window.location.hash !== `#${toolId}`) {
+  if (syncHash && window.location.hash !== `#/app/${toolId}` && window.location.hash !== `#${toolId}`) {
     history.replaceState(null, '', `#/app/${toolId}`);
   }
 
@@ -474,10 +477,7 @@ function buildTopbar() {
     </div>
     <div class="topbar__spacer"></div>
     <div class="topbar__actions">
-      <div class="topbar__meta-badge" title="All PDF processing is 100% local on this machine">
-        <i data-lucide="shield-check"></i>
-        <span>100% Local</span>
-      </div>
+
       <div class="theme-toggle" role="group" aria-label="Theme selection" id="topbar-theme-toggle">
         <button class="theme-toggle__btn" data-theme-value="light" title="Light theme" aria-label="Light theme">
           <i data-lucide="sun"></i>

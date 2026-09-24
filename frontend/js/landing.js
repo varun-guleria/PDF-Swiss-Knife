@@ -63,11 +63,7 @@ export function initLandingPage({ onOpenApp }) {
       keywords[kwIndex].classList.remove('hero-keyword--active');
       kwIndex++;
       if (kwIndex >= keywords.length) {
-        // Finished one full cycle — stop on the last word
-        kwIndex = keywords.length - 1;
-        keywords[kwIndex].classList.add('hero-keyword--active');
-        clearInterval(kwInterval);
-        return;
+        kwIndex = 0;
       }
       keywords[kwIndex].classList.add('hero-keyword--active');
     }, 2500);
