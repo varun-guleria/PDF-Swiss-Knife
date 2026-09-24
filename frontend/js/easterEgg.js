@@ -19,7 +19,10 @@
       borderTopLeftRadius: '15px',
       borderBottomLeftRadius: '15px',
       zIndex: '9999',
-      boxShadow: '-4px 4px 10px rgba(0,0,0,0.2)'
+      boxShadow: '-4px 4px 10px rgba(0,0,0,0.2)',
+      opacity: '0',
+      transition: 'opacity 0.5s ease',
+      pointerEvents: 'none'
     });
     document.body.appendChild(bullseye);
 
@@ -36,6 +39,11 @@
       logo.addEventListener('pointerdown', (e) => {
         if (e.button !== 0) return; // Only left click
         e.preventDefault();
+        
+        // Show bullseye
+        if (bullseye.style.opacity === '0') {
+          bullseye.style.opacity = '1';
+        }
         
         // Cycle hue for each new knife
         hueCounter = (hueCounter + 65) % 360;
@@ -160,14 +168,15 @@
         // Add a slight wobble animation for impact
         knife.style.transition = 'transform 0.1s ease-out';
         // Assume knife points to the right in the image. We stick it horizontally.
-        knife.style.transform = `rotate(90deg) scale(1.1)`; 
+        // We translate it 25px to the right so the blade "dips" into the target
+        knife.style.transform = `translate(25px, 0px) rotate(45deg) scale(1.1)`; 
         
         // Remove after 4 seconds
         setTimeout(() => {
           if (knife.parentElement) {
             knife.style.transition = 'opacity 0.3s, transform 0.3s';
             knife.style.opacity = '0';
-            knife.style.transform = 'translateY(50px) rotate(90deg)';
+            knife.style.transform = 'translate(25px, 50px) rotate(45deg) scale(1.1)';
             setTimeout(() => knife.remove(), 300);
           }
         }, 4000);
