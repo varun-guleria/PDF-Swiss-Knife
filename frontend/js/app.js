@@ -516,6 +516,9 @@ async function boot() {
   buildSidebar();
   buildTopbar();
 
+  // 2b. Proactively wake up the backend (helpful for free-tier PaaS cold starts like Render)
+  api.health().catch(() => {});
+
   // 3. Apply theme properly (also updates toggle button states everywhere)
   applyTheme(savedTheme);
 
