@@ -14,8 +14,10 @@
 
 // ─── Configuration ─────────────────────────────────────────────────────────
 
-/** Base URL of the backend. Empty string uses relative paths (compatible with Netlify proxy and local Flask server) */
-const BASE_URL = '';
+/** Base URL of the backend. Empty string uses relative paths for local dev, Render URL for production to bypass Netlify proxy limits */
+const BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+  ? '' 
+  : 'https://pdf-swiss-knife.onrender.com';
 
 /** Polling interval in milliseconds */
 const POLL_INTERVAL = 500;

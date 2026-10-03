@@ -52,6 +52,12 @@ def create_app() -> Flask:
         static_url_path="",
     )
 
+    try:
+        from flask_cors import CORS
+        CORS(app)
+    except ImportError:
+        log.warning("flask-cors not installed, skipping CORS setup")
+
     app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
 
     # ── Register route blueprints ──────────────────────────────────────────
