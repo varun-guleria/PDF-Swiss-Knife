@@ -156,9 +156,15 @@ export function renderBatch(container) {
             <span id="summary-structure-text">Add repeating and unique files to preview structure</span>
           </div>
 
-          <div class="batch-summary-settings" style="margin-top:var(--space-4); margin-bottom:var(--space-4);">
-            <label for="batch-filename-suffix" style="display:block; font-size:var(--font-size-sm); color:var(--color-text-secondary); margin-bottom:var(--space-2);">Output Filename Suffix</label>
-            <input type="text" id="batch-filename-suffix" class="input" value="_merged" style="width:100%;" placeholder="e.g. _merged, _final" />
+          <div class="batch-summary-settings" style="margin-top:var(--space-4); margin-bottom:var(--space-4); display:flex; gap:var(--space-3);">
+            <div style="flex:1;">
+              <label for="batch-filename-prefix" style="display:block; font-size:var(--font-size-sm); color:var(--color-text-secondary); margin-bottom:var(--space-2);">Filename Prefix</label>
+              <input type="text" id="batch-filename-prefix" class="input" value="" style="width:100%;" placeholder="e.g. 2024_" />
+            </div>
+            <div style="flex:1;">
+              <label for="batch-filename-suffix" style="display:block; font-size:var(--font-size-sm); color:var(--color-text-secondary); margin-bottom:var(--space-2);">Filename Suffix</label>
+              <input type="text" id="batch-filename-suffix" class="input" value="_merged" style="width:100%;" placeholder="e.g. _merged" />
+            </div>
           </div>
 
           <div>
@@ -571,10 +577,13 @@ export function renderBatch(container) {
         status: 'Uploading',
       });
 
+      const prefixInput = panel.querySelector('#batch-filename-prefix');
+      const prefix = prefixInput ? prefixInput.value : '';
+
       const suffixInput = panel.querySelector('#batch-filename-suffix');
       const suffix = suffixInput ? suffixInput.value : '_merged';
 
-      const { job_id } = await api.startBatch(activeRepeating, uniqueFiles, suffix);
+      const { job_id } = await api.startBatch(activeRepeating, uniqueFiles, prefix, suffix);
 
       const finalStatus = await api.pollJob(job_id, (job) => {
         progressView.update({

@@ -31,6 +31,7 @@ def _run_batch_job(
     repeating_paths: list[Path],
     unique_paths: list[Path],
     output_dir: Path,
+    prefix: str = "",
     suffix: str = "_merged",
 ):
     """Background worker that runs the batch merge and updates job status."""
@@ -49,6 +50,7 @@ def _run_batch_job(
             repeating_paths,
             unique_paths,
             output_dir,
+            prefix=prefix,
             suffix=suffix,
             progress_callback=on_progress,
         )
@@ -95,6 +97,7 @@ def start_batch():
     """Handle batch PDF build request."""
     repeating_files = request.files.getlist("repeating_files")
     unique_files = request.files.getlist("unique_files")
+    prefix = request.form.get("prefix", "")
     suffix = request.form.get("suffix", "_merged")
 
     if not repeating_files:
@@ -136,7 +139,7 @@ def start_batch():
 
     thread = threading.Thread(
         target=_run_batch_job,
-        args=(job_id, repeating_paths, unique_paths, output_dir, suffix),
+        args=(job_id, repeating_paths, unique_paths, output_dir, prefix, suffix),
         daemon=True,
     )
     thread.start()

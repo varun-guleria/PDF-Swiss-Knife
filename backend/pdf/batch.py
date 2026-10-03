@@ -43,6 +43,7 @@ def batch_merge(
     repeating_paths: List[Path],
     unique_paths: List[Path],
     output_dir: Path,
+    prefix: str = "",
     suffix: str = "_merged",
     progress_callback: Optional[Callable[[int, int, str], None]] = None,
 ) -> Dict[str, Any]:
@@ -102,7 +103,7 @@ def batch_merge(
     for idx, unique_path in enumerate(unique_paths, start=1):
         # Derive output name from unique file stem, removing the internal prefix (e.g. 0000_)
         original_stem = unique_path.stem.split("_", 1)[1] if "_" in unique_path.stem else unique_path.stem
-        out_name = original_stem + suffix + ".pdf"
+        out_name = prefix + original_stem + suffix + ".pdf"
 
         if progress_callback:
             progress_callback(idx, total, out_name)
