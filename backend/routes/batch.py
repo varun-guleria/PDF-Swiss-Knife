@@ -31,6 +31,7 @@ def _run_batch_job(
     repeating_paths: list[Path],
     unique_paths: list[Path],
     output_dir: Path,
+    suffix: str = "_merged",
 ):
     """Background worker that runs the batch merge and updates job status."""
     try:
@@ -48,6 +49,7 @@ def _run_batch_job(
             repeating_paths,
             unique_paths,
             output_dir,
+            suffix=suffix,
             progress_callback=on_progress,
         )
 
@@ -93,6 +95,7 @@ def start_batch():
     """Handle batch PDF build request."""
     repeating_files = request.files.getlist("repeating_files")
     unique_files = request.files.getlist("unique_files")
+    suffix = request.form.get("suffix", "_merged")
 
     if not repeating_files:
         return jsonify({"error": "Please upload at least one repeating PDF."}), 400
@@ -133,7 +136,7 @@ def start_batch():
 
     thread = threading.Thread(
         target=_run_batch_job,
-        args=(job_id, repeating_paths, unique_paths, output_dir),
+        args=(job_id, repeating_paths, unique_paths, output_dir, suffix),
         daemon=True,
     )
     thread.start()

@@ -247,12 +247,14 @@ export async function reorganizePdf(docId, pageSpecs, outputName = 'organized_do
  * Start a batch PDF build job.
  * @param {File[]} repeatingFiles  — PDFs merged into every output (in order)
  * @param {File[]} uniqueFiles     — one output PDF per unique file
+ * @param {string} [suffix='_merged'] — suffix appended to each output file
  * @returns {Promise<{ job_id: string, repeating_count: number, unique_count: number, output_count: number }>}
  */
-export async function startBatch(repeatingFiles, uniqueFiles) {
+export async function startBatch(repeatingFiles, uniqueFiles, suffix = '_merged') {
   const fd = new FormData();
   repeatingFiles.forEach(f => fd.append('repeating_files', f));
   uniqueFiles.forEach(f => fd.append('unique_files', f));
+  fd.append('suffix', suffix);
   return upload('/api/batch/start', fd);
 }
 
