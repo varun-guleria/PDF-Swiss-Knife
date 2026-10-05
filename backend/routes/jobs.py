@@ -18,7 +18,7 @@ jobs_bp = Blueprint("jobs", __name__)
 def health():
     """Health check — confirms the backend is running."""
     cleanup_old_jobs()  # Opportunistic cleanup on each health check
-    return jsonify({"status": "ok", "service": "PDF Swiss-Knife"})
+    return "OK", 200
 
 
 @jobs_bp.get("/api/jobs/<job_id>/status")
